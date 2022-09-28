@@ -13,6 +13,8 @@ pandas = "^1.5.0"
 alembic = "^1.8.1"
 pre-commit = "^2.20.0"
 psycopg2-binary = "^2.9.3"
+pydantic = "^1.10.2"
+structlog = "^22.1.0"
 
 
 [build-system]
