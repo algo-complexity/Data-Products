@@ -5,11 +5,12 @@ from db.base import Base
 
 class Stock(Base):
     __tablename__ = "stock"
+
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    ticker = Column(String(4))
-    summary = Column(String)
-    exchange_id = Column(Integer, ForeignKey("exchange.id"))
+    name = Column(String, nullable=False)
+    ticker = Column(String(4), nullable=False)
+    summary = Column(String, nullable=False)
+    exchange_id = Column(Integer, ForeignKey("exchange.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -24,10 +25,11 @@ class Stock(Base):
 
 class Exchange(Base):
     __tablename__ = "exchange"
+
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    short_name = Column(String(5))
-    country = Column(Integer, ForeignKey("country.id"))
+    name = Column(String, nullable=False)
+    short_name = Column(String(5), nullable=False)
+    country = Column(Integer, ForeignKey("country.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -43,8 +45,8 @@ class Exchange(Base):
 class Country(Base):
     __tablename__ = "country"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    code = Column(String(3))
+    name = Column(String, nullable=False)
+    code = Column(String(3), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -59,11 +61,11 @@ class Country(Base):
 class Price(Base):
     __tablename__ = "price"
     id = Column(Integer, primary_key=True)
-    low = Column(Integer)
-    high = Column(Integer)
-    open = Column(Integer)
-    close = Column(Integer)
-    timestamp = Column(DateTime(timezone=True))
+    low = Column(Integer, nullable=False)
+    high = Column(Integer, nullable=False)
+    open = Column(Integer, nullable=False)
+    close = Column(Integer, nullable=False)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -81,8 +83,8 @@ class Price(Base):
 class StockPrice(Base):
     __tablename__ = "stockprice"
     id = Column(Integer, primary_key=True)
-    stock_id = Column(Integer, ForeignKey("stock.id"))
-    price_id = Column(Integer, ForeignKey("price.id"))
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
+    price_id = Column(Integer, ForeignKey("price.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -96,11 +98,11 @@ class StockPrice(Base):
 class News(Base):
     __tablename__ = "news"
     id = Column(Integer, primary_key=True)
-    headline = Column(String)
-    content = Column(String)
-    url = Column(String)
-    sentiment = Column(String, nullable=True)
-    summary = Column(String)
+    headline = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    url = Column(String, nullable=False)
+    sentiment = Column(String)
+    summary = Column(String, nullable=False)
 
     def __repr__(self):
         return f"""
@@ -118,8 +120,8 @@ class News(Base):
 class StockNews(Base):
     __tablename__ = "stocknews"
     id = Column(Integer, primary_key=True)
-    stock_id = Column(Integer, ForeignKey("stock.id"))
-    news_id = Column(Integer, ForeignKey("news.id"))
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
+    news_id = Column(Integer, ForeignKey("news.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -133,15 +135,15 @@ class StockNews(Base):
 class Tweet(Base):
     __tablename__ = "tweet"
     id = Column(Integer, primary_key=True)
-    content = Column(String)
-    timestamp = Column(DateTime(timezone=True))
-    author = Column(String)
-    sentiment = Column(String, nullable=True)
-    retweets = Column(Integer)
-    comments = Column(Integer)
-    hashtags = Column(String)
-    likes = Column(Integer)
-    url = Column(String)
+    content = Column(String, nullable=False)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
+    author = Column(String, nullable=False)
+    sentiment = Column(String)
+    retweets = Column(Integer, nullable=False)
+    comments = Column(Integer, nullable=False)
+    hashtags = Column(String, nullable=False)
+    likes = Column(Integer, nullable=False)
+    url = Column(String, nullable=False)
 
     def __repr__(self):
         return f"""
@@ -163,8 +165,8 @@ class Tweet(Base):
 class StockTweet(Base):
     __tablename__ = "stocktweet"
     id = Column(Integer, primary_key=True)
-    stock_id = Column(Integer, ForeignKey("stock.id"))
-    tweet_id = Column(Integer, ForeignKey("tweet.id"))
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
+    tweet_id = Column(Integer, ForeignKey("tweet.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -178,14 +180,14 @@ class StockTweet(Base):
 class RedditPost(Base):
     __tablename__ = "redditpost"
     id = Column(Integer, primary_key=True)
-    title = Column(String)
-    content = Column(String)
-    timestamp = Column(DateTime(timezone=True))
-    author = Column(String)
-    sentiment = Column(String, nullable=True)
-    score = Column(Integer)
-    num_comments = Column(Integer)
-    url = Column(String)
+    title = Column(String, nullable=False)
+    content = Column(String, nullable=False)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
+    author = Column(String, nullable=False)
+    sentiment = Column(String)
+    score = Column(Integer, nullable=False)
+    num_comments = Column(Integer, nullable=False)
+    url = Column(String, nullable=False)
 
     def __repr__(self):
         return f"""
@@ -206,8 +208,8 @@ class RedditPost(Base):
 class StockReddit(Base):
     __tablename__ = "stockreddit"
     id = Column(Integer, primary_key=True)
-    stock_id = Column(Integer, ForeignKey("stock.id"))
-    redditpost_id = Column(Integer, ForeignKey("redditpost.id"))
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
+    redditpost_id = Column(Integer, ForeignKey("redditpost.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -221,8 +223,8 @@ class StockReddit(Base):
 class Indicator(Base):
     __tablename__ = "indicator"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    value = Column(Float)
+    name = Column(String, nullable=False)
+    value = Column(Float, nullable=False)
 
     def __repr__(self):
         return f"""
@@ -237,8 +239,8 @@ class Indicator(Base):
 class StockIndicator(Base):
     __tablename__ = "stockindicator"
     id = Column(Integer, primary_key=True)
-    stock_id = Column(Integer, ForeignKey("stock.id"))
-    indicator_id = Column(Integer, ForeignKey("indicator.id"))
+    stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
+    indicator_id = Column(Integer, ForeignKey("indicator.id"), nullable=False)
 
     def __repr__(self):
         return f"""

@@ -1,15 +1,15 @@
 """initial
 
-Revision ID: 30025ba4ae22
+Revision ID: ef3554a4abea
 Revises:
-Create Date: 2022-09-28 18:56:03.586108
+Create Date: 2022-09-28 19:31:08.059319
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "30025ba4ae22"
+revision = "ef3554a4abea"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -20,70 +20,70 @@ def upgrade() -> None:
     op.create_table(
         "country",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("code", sa.String(length=3), nullable=True),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("code", sa.String(length=3), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "indicator",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("value", sa.Float(), nullable=True),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("value", sa.Float(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "news",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("headline", sa.String(), nullable=True),
-        sa.Column("content", sa.String(), nullable=True),
-        sa.Column("url", sa.String(), nullable=True),
+        sa.Column("headline", sa.String(), nullable=False),
+        sa.Column("content", sa.String(), nullable=False),
+        sa.Column("url", sa.String(), nullable=False),
         sa.Column("sentiment", sa.String(), nullable=True),
-        sa.Column("summary", sa.String(), nullable=True),
+        sa.Column("summary", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "price",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("low", sa.Integer(), nullable=True),
-        sa.Column("high", sa.Integer(), nullable=True),
-        sa.Column("open", sa.Integer(), nullable=True),
-        sa.Column("close", sa.Integer(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
+        sa.Column("low", sa.Integer(), nullable=False),
+        sa.Column("high", sa.Integer(), nullable=False),
+        sa.Column("open", sa.Integer(), nullable=False),
+        sa.Column("close", sa.Integer(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "redditpost",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("title", sa.String(), nullable=True),
-        sa.Column("content", sa.String(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("author", sa.String(), nullable=True),
+        sa.Column("title", sa.String(), nullable=False),
+        sa.Column("content", sa.String(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("author", sa.String(), nullable=False),
         sa.Column("sentiment", sa.String(), nullable=True),
-        sa.Column("score", sa.Integer(), nullable=True),
-        sa.Column("num_comments", sa.Integer(), nullable=True),
-        sa.Column("url", sa.String(), nullable=True),
+        sa.Column("score", sa.Integer(), nullable=False),
+        sa.Column("num_comments", sa.Integer(), nullable=False),
+        sa.Column("url", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "tweet",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("content", sa.String(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
-        sa.Column("author", sa.String(), nullable=True),
+        sa.Column("content", sa.String(), nullable=False),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("author", sa.String(), nullable=False),
         sa.Column("sentiment", sa.String(), nullable=True),
-        sa.Column("retweets", sa.Integer(), nullable=True),
-        sa.Column("comments", sa.Integer(), nullable=True),
-        sa.Column("hashtags", sa.String(), nullable=True),
-        sa.Column("likes", sa.Integer(), nullable=True),
-        sa.Column("url", sa.String(), nullable=True),
+        sa.Column("retweets", sa.Integer(), nullable=False),
+        sa.Column("comments", sa.Integer(), nullable=False),
+        sa.Column("hashtags", sa.String(), nullable=False),
+        sa.Column("likes", sa.Integer(), nullable=False),
+        sa.Column("url", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "exchange",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("short_name", sa.String(length=5), nullable=True),
-        sa.Column("country", sa.Integer(), nullable=True),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("short_name", sa.String(length=5), nullable=False),
+        sa.Column("country", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["country"],
             ["country.id"],
@@ -93,10 +93,10 @@ def upgrade() -> None:
     op.create_table(
         "stock",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=True),
-        sa.Column("ticker", sa.String(length=4), nullable=True),
-        sa.Column("summary", sa.String(), nullable=True),
-        sa.Column("exchange_id", sa.Integer(), nullable=True),
+        sa.Column("name", sa.String(), nullable=False),
+        sa.Column("ticker", sa.String(length=4), nullable=False),
+        sa.Column("summary", sa.String(), nullable=False),
+        sa.Column("exchange_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["exchange_id"],
             ["exchange.id"],
@@ -106,8 +106,8 @@ def upgrade() -> None:
     op.create_table(
         "stockindicator",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("stock_id", sa.Integer(), nullable=True),
-        sa.Column("indicator_id", sa.Integer(), nullable=True),
+        sa.Column("stock_id", sa.Integer(), nullable=False),
+        sa.Column("indicator_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["indicator_id"],
             ["indicator.id"],
@@ -121,8 +121,8 @@ def upgrade() -> None:
     op.create_table(
         "stocknews",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("stock_id", sa.Integer(), nullable=True),
-        sa.Column("news_id", sa.Integer(), nullable=True),
+        sa.Column("stock_id", sa.Integer(), nullable=False),
+        sa.Column("news_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["news_id"],
             ["news.id"],
@@ -136,8 +136,8 @@ def upgrade() -> None:
     op.create_table(
         "stockprice",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("stock_id", sa.Integer(), nullable=True),
-        sa.Column("price_id", sa.Integer(), nullable=True),
+        sa.Column("stock_id", sa.Integer(), nullable=False),
+        sa.Column("price_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["price_id"],
             ["price.id"],
@@ -151,8 +151,8 @@ def upgrade() -> None:
     op.create_table(
         "stockreddit",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("stock_id", sa.Integer(), nullable=True),
-        sa.Column("redditpost_id", sa.Integer(), nullable=True),
+        sa.Column("stock_id", sa.Integer(), nullable=False),
+        sa.Column("redditpost_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["redditpost_id"],
             ["redditpost.id"],
@@ -166,8 +166,8 @@ def upgrade() -> None:
     op.create_table(
         "stocktweet",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("stock_id", sa.Integer(), nullable=True),
-        sa.Column("tweet_id", sa.Integer(), nullable=True),
+        sa.Column("stock_id", sa.Integer(), nullable=False),
+        sa.Column("tweet_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["stock_id"],
             ["stock.id"],
