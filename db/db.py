@@ -63,7 +63,6 @@ class Price(Base):
     high = Column(Integer)
     open = Column(Integer)
     close = Column(Integer)
-    # TODO standardize timezone?
     timestamp = Column(DateTime(timezone=True))
 
     def __repr__(self):
@@ -101,7 +100,6 @@ class News(Base):
     content = Column(String)
     url = Column(String)
     sentiment = Column(String, nullable=True)
-    # TODO text summarization
     summary = Column(String)
 
     def __repr__(self):
