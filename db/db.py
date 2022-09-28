@@ -64,7 +64,7 @@ class Price(Base):
     open = Column(Integer)
     close = Column(Integer)
     # TODO standardize timezone?
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime(timezone=True))
 
     def __repr__(self):
         return f"""
@@ -136,7 +136,7 @@ class Tweet(Base):
     __tablename__ = "tweet"
     id = Column(Integer, primary_key=True)
     content = Column(String)
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime(timezone=True))
     author = Column(String)
     sentiment = Column(String, nullable=True)
     retweets = Column(Integer)
@@ -182,7 +182,7 @@ class RedditPost(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     content = Column(String)
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime(timezone=True))
     author = Column(String)
     sentiment = Column(String, nullable=True)
     score = Column(Integer)

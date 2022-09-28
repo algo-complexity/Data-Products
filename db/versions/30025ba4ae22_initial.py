@@ -1,15 +1,15 @@
 """initial
 
-Revision ID: efcdf4b87a08
+Revision ID: 30025ba4ae22
 Revises:
-Create Date: 2022-09-28 18:46:02.861728
+Create Date: 2022-09-28 18:56:03.586108
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "efcdf4b87a08"
+revision = "30025ba4ae22"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -48,7 +48,7 @@ def upgrade() -> None:
         sa.Column("high", sa.Integer(), nullable=True),
         sa.Column("open", sa.Integer(), nullable=True),
         sa.Column("close", sa.Integer(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(), nullable=True),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -56,7 +56,7 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("title", sa.String(), nullable=True),
         sa.Column("content", sa.String(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(), nullable=True),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
         sa.Column("author", sa.String(), nullable=True),
         sa.Column("sentiment", sa.String(), nullable=True),
         sa.Column("score", sa.Integer(), nullable=True),
@@ -68,7 +68,7 @@ def upgrade() -> None:
         "tweet",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("content", sa.String(), nullable=True),
-        sa.Column("timestamp", sa.DateTime(), nullable=True),
+        sa.Column("timestamp", sa.DateTime(timezone=True), nullable=True),
         sa.Column("author", sa.String(), nullable=True),
         sa.Column("sentiment", sa.String(), nullable=True),
         sa.Column("retweets", sa.Integer(), nullable=True),
