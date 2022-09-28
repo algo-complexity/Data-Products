@@ -74,3 +74,24 @@
    ```bash
    docker run -d -v dataproducts_db:/var/lib/postgresql/data -e POSTGRES_USER=dataproducts -e POSTGRES_PASSWORD=password -e POSTGRES_DB=dataproducts -p 5432:5432 --name dataproducts_db postgres
    ```
+
+## Notes
+
+1. Generate migration with alembic:
+
+    ```bash
+    mkdir -p db/versions
+    alembic revision --autogenerate -m 'initial DB model commit'
+    ```
+
+2. Apply migration
+
+    ```bash
+    alembic upgrade head
+    ```
+
+2. Undo migration
+
+    ```bash
+    alembic downgrade -1
+    ```
