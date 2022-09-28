@@ -25,11 +25,7 @@ class Config(BaseSettings):
 
     debug: bool = True
 
-    database_name: str
-    database_user: str
-    database_password: str
-    database_host: str
-    database_port: int = 5432
+    database_url: str
 
 
 # Lazily initialize the config variable using module-level __getattr__
