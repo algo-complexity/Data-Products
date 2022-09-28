@@ -16,7 +16,12 @@ psycopg2-binary = "^2.9.3"
 pydantic = "^1.10.2"
 structlog = "^22.1.0"
 dash-bootstrap-components = "^1.2.1"
+praw = "^7.6.0"
+nltk = "^3.7"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.8.0"
 
 [build-system]
 requires = ["poetry-core"]
