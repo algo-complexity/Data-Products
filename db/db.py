@@ -180,6 +180,7 @@ class StockTweet(Base):
 class RedditPost(Base):
     __tablename__ = "redditpost"
     id = Column(Integer, primary_key=True)
+    api_id = Column(String, primary_key=True)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     timestamp = Column(DateTime(timezone=True), nullable=False)
