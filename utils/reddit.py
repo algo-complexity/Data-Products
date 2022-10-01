@@ -1,14 +1,25 @@
 import os
+import sys
+import uuid
 
-import nltk
+import numpy as np
 import pandas as pd
 import praw
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from services import bulk_upload
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
+from config import Config, config
+from db.connector import engine
 
 # retrieve env vars
-CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("REDDIT_CLIENT_SECRET")
-USER_AGENT = os.environ.get("REDDIT_USER_AGENT")
+config: Config
+CLIENT_ID = config.reddit_client_id
+CLIENT_SECRET = config.reddit_client_secret
+USER_AGENT = config.reddit_user_agent
 
 # instantiate reddit object
 reddit = praw.Reddit(
@@ -16,7 +27,7 @@ reddit = praw.Reddit(
 )
 
 # download vader lexicon for sentiment analysis
-nltk.download("vader_lexicon")
+# nltk.download("vader_lexicon")
 
 
 def get_posts(subreddit, symb, time="week"):
@@ -31,41 +42,47 @@ def get_posts(subreddit, symb, time="week"):
         DataFrame: Pandas df
     """
     posts = []
+    sent = SentimentIntensityAnalyzer()
     for post in reddit.subreddit(subreddit).search(symb, time_filter=time):
         if post.is_self:
+            # FIXME: masking 128 bit int (too big for db, but non-zero chance of collision)
+            id = uuid.uuid1().int >> 100
             posts.append(
                 [
+                    id,
                     post.title,
-                    post.score,
-                    post.id,
-                    post.subreddit,
-                    post.url,
-                    post.num_comments,
                     post.selftext,
-                    post.created,
+                    pd.to_datetime(post.created, unit="s"),
+                    post.author.name,
+                    round(sent.polarity_scores(post.selftext)["compound"], 2),
+                    post.score,
+                    post.num_comments,
+                    post.url,
+                    post.id,
                 ]
             )
     df = pd.DataFrame(
         posts,
         columns=[
-            "title",
-            "score",
             "id",
-            "subreddit",
-            "url",
+            "title",
+            "content",
+            "timestamp",
+            "author",
+            "sentiment",
+            "score",
             "num_comments",
-            "body",
-            "created",
+            "url",
+            "api_id",
         ],
     )
-
-    df["timestamp"] = pd.to_datetime(df["created"], unit="s")
-
-    sent = SentimentIntensityAnalyzer()
-    b_polarity = [round(sent.polarity_scores(i)["compound"], 2) for i in df["body"]]
-    df["body_sentiment_score"] = b_polarity
-
-    t_polarity = [round(sent.polarity_scores(i)["compound"], 2) for i in df["title"]]
-    df["title_sentiment_score"] = t_polarity
-
+    # remove rows with empty strings/null
+    df.replace("", np.nan, inplace=True)
+    df.dropna(inplace=True)
+    df.to_csv("test.csv")
     return df
+
+
+if __name__ == "__main__":
+    df = get_posts("wallstreetbets", "bbby")
+    bulk_upload(engine, orig_df=df, dest_table="redditpost")
