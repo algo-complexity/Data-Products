@@ -22,9 +22,7 @@ CLIENT_SECRET = config.reddit_client_secret
 USER_AGENT = config.reddit_user_agent
 
 # instantiate reddit object
-reddit = praw.Reddit(
-    client_id=CLIENT_ID, client_secret=CLIENT_SECRET, user_agent=USER_AGENT
-)
+reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, user_agent=USER_AGENT)
 
 # download vader lexicon for sentiment analysis
 # nltk.download("vader_lexicon")
@@ -45,8 +43,8 @@ def get_posts(subreddit, symb, time="week"):
     sent = SentimentIntensityAnalyzer()
     for post in reddit.subreddit(subreddit).search(symb, time_filter=time):
         if post.is_self:
-            # FIXME: masking 128 bit int (too big for db, but non-zero chance of collision)
-            id = uuid.uuid1().int >> 100
+            # FIXME: BigInteger allows for 65bit, but still not 128
+            id = uuid.uuid1().int >> 64
             posts.append(
                 [
                     id,
@@ -79,7 +77,6 @@ def get_posts(subreddit, symb, time="week"):
     # remove rows with empty strings/null
     df.replace("", np.nan, inplace=True)
     df.dropna(inplace=True)
-    df.to_csv("test.csv")
     return df
 
 
