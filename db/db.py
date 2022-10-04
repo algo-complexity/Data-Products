@@ -1,4 +1,5 @@
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import (BigInteger, Column, DateTime, Float, ForeignKey,
+                        Integer, String)
 
 from db.base import Base
 
@@ -179,7 +180,8 @@ class StockTweet(Base):
 
 class RedditPost(Base):
     __tablename__ = "redditpost"
-    id = Column(Integer, primary_key=True)
+    id = Column(BigInteger, primary_key=True)
+    api_id = Column(String, nullable=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     timestamp = Column(DateTime(timezone=True), nullable=False)
@@ -209,7 +211,7 @@ class StockReddit(Base):
     __tablename__ = "stockreddit"
     id = Column(Integer, primary_key=True)
     stock_id = Column(Integer, ForeignKey("stock.id"), nullable=False)
-    redditpost_id = Column(Integer, ForeignKey("redditpost.id"), nullable=False)
+    redditpost_id = Column(BigInteger, ForeignKey("redditpost.id"), nullable=False)
 
     def __repr__(self):
         return f"""
