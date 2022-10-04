@@ -31,7 +31,6 @@ class Config(BaseSettings):
     reddit_client_secret: str
     reddit_user_agent: str
 
-
 # Lazily initialize the config variable using module-level __getattr__
 # so that we can import the Config class without triggering config load.
 _config = None
