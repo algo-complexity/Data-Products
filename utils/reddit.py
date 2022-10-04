@@ -1,19 +1,11 @@
-import os
-import sys
 import uuid
 
 import numpy as np
 import pandas as pd
 import praw
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from services import bulk_upload
-
-current = os.path.dirname(os.path.realpath(__file__))
-parent = os.path.dirname(current)
-sys.path.append(parent)
 
 from config import Config, config
-from db.connector import engine
 
 # retrieve env vars
 config: Config
@@ -22,7 +14,9 @@ CLIENT_SECRET = config.reddit_client_secret
 USER_AGENT = config.reddit_user_agent
 
 # instantiate reddit object
-reddit = praw.Reddit(client_id=CLIENT_ID, client_secret=CLIENT_SECRET, user_agent=USER_AGENT)
+reddit = praw.Reddit(
+    client_id=CLIENT_ID, client_secret=CLIENT_SECRET, user_agent=USER_AGENT
+)
 
 # download vader lexicon for sentiment analysis
 # nltk.download("vader_lexicon")
@@ -78,8 +72,3 @@ def get_posts(subreddit, symb, time="week"):
     df.replace("", np.nan, inplace=True)
     df.dropna(inplace=True)
     return df
-
-
-if __name__ == "__main__":
-    df = get_posts("wallstreetbets", "bbby")
-    bulk_upload(engine, orig_df=df, dest_table="redditpost")
