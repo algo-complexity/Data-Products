@@ -4,7 +4,7 @@ from dash import Input, Output, html
 from dash.exceptions import PreventUpdate
 
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+server = app.server
 
 def create_card(data):
     body_text = "Sample text."
