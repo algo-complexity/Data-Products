@@ -22,7 +22,7 @@ reddit = praw.Reddit(
 # nltk.download("vader_lexicon")
 
 
-def get_posts(subreddit, symb, time="week"):
+def get_posts(subreddit, symb, time="week") -> pd.DataFrame:
     """Fetches reddit posts and relevant information sentiment score.
 
     Args:

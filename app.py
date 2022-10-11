@@ -5,18 +5,14 @@ import plotly.graph_objects as go
 from dash import Input, Output, dcc, html
 from dash.exceptions import PreventUpdate
 from plotly import data
-
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-server = app.server
-
-# TODO: Remove once database is connected to this page
-options = [
-    {"label": "New York City", "value": "NYC"},
-    {"label": "Montreal", "value": "MTL"},
-    {"label": "San Francisco", "value": "SF"},
-]
+from flask_caching import Cache
+from utils.services import get_all_stocks, get_stock_from_yahoo
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+cache = Cache(
+    app.server,
+    config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "./cache", "CACHE_THRESHOLD": 10},
+)
 
 # APP LAYOUT
 app.layout = dbc.Container(
@@ -57,6 +53,14 @@ app.layout = dbc.Container(
 )
 
 
+# CACHE FUNCTIONS
+# Get list of stock names
+@cache.memoize(timeout=60)
+def fetch_stock_options() -> list[dict]:
+    stocks = get_all_stocks()
+    return [{"label": stock.name, "value": stock.ticker} for stock in stocks]
+
+
 # CALLBACKS FOR INTERACTION
 # Main search bar callback
 @app.callback(
@@ -66,36 +70,34 @@ app.layout = dbc.Container(
 def update_page(search_value):
     if not search_value:
         raise PreventUpdate
-    # Replace o["label"] with a database query
-    return [o for o in options if search_value in o["label"]]
+    options = [o for o in fetch_stock_options() if search_value in o["label"]]
+    if options == []:
+        stock = get_stock_from_yahoo(search_value)
+        if stock:
+            [{"label": stock.name, "value": stock.ticker}]
+    return options
 
 
 # Stock Chart callback
 @app.callback(Output("stock-chart", "figure"), Input("dropdown", "value"))
 def update_stock_chart(value):
-    # TODO: Remove this direct dependency on a raw dataset and load from DB/API
+    chart = go.Figure()
     if value:
         # Search result by user
         df = pd.read_csv(
             "https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv"
         )
-    else:
-        # Display S&P 500 chart
-        value = "S&P 500"
-        df = pd.read_csv(
-            "https://raw.githubusercontent.com/plotly/datasets/master/finance-charts-apple.csv"
+        chart = go.Figure(
+            data=[
+                go.Candlestick(
+                    x=df["Date"],
+                    open=df["open"],
+                    high=df["high"],
+                    low=df["low"],
+                    close=df["close"],
+                )
+            ]
         )
-    chart = go.Figure(
-        data=[
-            go.Candlestick(
-                x=df["Date"],
-                open=df["AAPL.Open"],
-                high=df["AAPL.High"],
-                low=df["AAPL.Low"],
-                close=df["AAPL.Close"],
-            )
-        ]
-    )
     return chart
 
 
@@ -124,7 +126,7 @@ def update_stock_indicator(value):
 @app.callback(Output("stock-name", "children"), Input("dropdown", "value"))
 def update_stock_name(value):
     if not value:
-        value = "S&P 500"
+        value = "Please pick a stock"
     return value
 
 

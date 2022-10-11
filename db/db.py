@@ -46,7 +46,8 @@ class Country(Base):
     __tablename__ = "country"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    code = Column(String(3), nullable=False)
+    alpha2 = Column(String(2), nullable=False)
+    alpha3 = Column(String(3), nullable=False)
 
     def __repr__(self):
         return f"""
