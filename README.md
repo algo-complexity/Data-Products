@@ -104,8 +104,14 @@ heroku config:set DISABLE_POETRY_CREATE_RUNTIME_FILE=0
     alembic upgrade head
     ```
 
-2. Undo migration
+3. Undo migration
 
     ```bash
     alembic downgrade -1
+    ```
+
+4. Access to psql shell in postgres docker:
+
+    ```bash
+    docker exec -it dataproducts_db psql -U dataproducts
     ```
