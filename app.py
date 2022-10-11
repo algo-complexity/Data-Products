@@ -6,6 +6,9 @@ from dash import Input, Output, dcc, html
 from dash.exceptions import PreventUpdate
 from plotly import data
 
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
+
 # TODO: Remove once database is connected to this page
 options = [
     {"label": "New York City", "value": "NYC"},

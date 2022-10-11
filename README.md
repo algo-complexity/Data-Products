@@ -75,6 +75,20 @@
    docker run -d -v dataproducts_db:/var/lib/postgresql/data -e POSTGRES_USER=dataproducts -e POSTGRES_PASSWORD=password -e POSTGRES_DB=dataproducts -p 5432:5432 --name dataproducts_db postgres
    ```
 
+## Heroku Poetry Buildpack setup
+
+This removes need to generate `runtime.txt` and `requirements.txt` as they are auto generated. [Source](https://elements.heroku.com/buildpacks/moneymeets/python-poetry-buildpack)
+
+```bash
+heroku buildpacks:clear
+heroku buildpacks:add https://github.com/moneymeets/python-poetry-buildpack.git
+heroku buildpacks:add heroku/python
+heroku config:set PYTHON_RUNTIME_VERSION=3.9.14
+heroku config:set POETRY_VERSION=1.2.1
+heroku config:set POETRY_EXPORT_DEV_REQUIREMENTS=1
+heroku config:set DISABLE_POETRY_CREATE_RUNTIME_FILE=0
+```
+
 ## Notes
 
 1. Generate migration with alembic:
