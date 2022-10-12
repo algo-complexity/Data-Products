@@ -47,11 +47,13 @@ def bulk_upload(orig_df, dest_table) -> list[Row]:
     write_list = orig_df.to_dict(orient="records")
 
     metadata = schema.MetaData(bind=engine)
-    table = Table(dest_table, metadata, autoload=True)
+    table = Table(dest_table.__tablename__, metadata, autoload=True)
 
-    with Session(engine) as session:
+    with Session(engine, expire_on_commit=False) as session:
         # Insert the dataframe into the database in one bulk
-        results = conn.execute(table.insert(), write_list)
+        conn.execute(table.insert(), write_list)
+        # Query to return rows as insert does not
+        results = session.query(dest_table)
 
         # Commit the changes
         session.commit()
@@ -79,7 +81,7 @@ def get_stock_from_yahoo(search: str) -> Optional[Stock]:
     stock = None
     if ticker:
         metadata = get_yahoo_stock_metadata(ticker)
-        with Session(engine) as session:
+        with Session(engine, expire_on_commit=False) as session:
             value = metadata["exchange"]["short_name"]
             exchange: Exchange = (
                 session.query(Exchange)
@@ -95,7 +97,6 @@ def get_stock_from_yahoo(search: str) -> Optional[Stock]:
         # TODO: Add Extra code to calculate indicators
         if stock:
             stock_data = get_yahoo_stock_price(ticker)
-            # BUG: Gives error no table db.db.Price
             rows = bulk_upload(stock_data, Price)
             stock_prices = [
                 StockPrice(stock_id=stock.id, price_id=row.id) for row in rows
