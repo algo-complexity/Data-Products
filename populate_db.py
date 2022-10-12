@@ -36,7 +36,7 @@ with Session(engine) as session:
             Exchange(
                 short_name=row["OPERATING MIC"],
                 name=row["NAME-INSTITUTION DESCRIPTION"],
-                country=values[row["ISO COUNTRY CODE (ISO 3166)"]].id,
+                country_id=values[row["ISO COUNTRY CODE (ISO 3166)"]].id,
             )
             for row in reader
             if row["ISO COUNTRY CODE (ISO 3166)"] in values.keys()

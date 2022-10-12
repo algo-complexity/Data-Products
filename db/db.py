@@ -29,7 +29,7 @@ class Exchange(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     short_name = Column(String(5), nullable=False)
-    country = Column(Integer, ForeignKey("country.id"), nullable=False)
+    country_id = Column(Integer, ForeignKey("country.id"), nullable=False)
 
     def __repr__(self):
         return f"""
@@ -37,7 +37,7 @@ class Exchange(Base):
                     id={self.id!r},
                     name={self.name!r},
                     short_name={self.short_name!r},
-                    country={self.country!r}
+                    country_id={self.country_id!r}
                 )
                 """
 
