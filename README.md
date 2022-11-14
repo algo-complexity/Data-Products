@@ -72,7 +72,7 @@
 2. Start the database container:
 
    ```bash
-   docker run -d -v dataproducts_db:/var/lib/postgresql/data -e POSTGRES_USER=dataproducts -e POSTGRES_PASSWORD=password -e POSTGRES_DB=dataproducts -p 5432:5432 --name dataproducts_db postgres
+   ./docker/run_db.sh
    ```
 
 ## Heroku Poetry Buildpack setup
@@ -110,8 +110,8 @@ heroku config:set DISABLE_POETRY_CREATE_RUNTIME_FILE=0
     alembic downgrade -1
     ```
 
-4. Access to psql shell in postgres docker:
+4. Access to psql shell in postgres docker with pgcli:
 
     ```bash
-    docker exec -it dataproducts_db psql -U dataproducts
+    ./docker/exec_db.sh
     ```
