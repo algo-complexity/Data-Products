@@ -26,3 +26,8 @@ def get_researcher_search(request, q: str = None, page: int = 1, limit: int = 10
 def get_researcher_name(request, ticker: str):
     stock = get_object_or_404(models.Stock, ticker=ticker)
     return schemas.Stock.from_orm(stock)
+
+@router.get("/stock/{str:ticker}/reddit", response=PaginatedList[schemas.Reddit])
+def get_researcher_name(request, ticker: str, page: int = 1, limit: int = 10):
+    results = models.Reddit.objects.filter(stock__ticker=ticker)
+    return paginate(results, schemas.Reddit, page, limit)

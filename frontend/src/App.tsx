@@ -82,7 +82,7 @@ const { Content, Footer } = Layout;
 //     previousPageData: PaginatedList<Tweet>,
 //   ) => {
 //     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.name}/tweets?page=${pageIndex + 1}`;
+//     return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
 //   };
 
 //   const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
@@ -127,7 +127,7 @@ const { Content, Footer } = Layout;
 //               renderItem={(item) => (
 //                 <List.Item key={item.author}>
 //                   <List.Item.Meta
-//                     title={<a href={item.url}>{item.author}</a>}
+//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
 //                     description={item.content}
 //                   />
 //                   <div>hashtags: {item.hashtags}</div>
@@ -143,77 +143,81 @@ const { Content, Footer } = Layout;
 //   );
 // };
 
-// const RedditComponent = ({ stock }: { stock: Stock }) => {
-//   const getKey = (
-//     pageIndex: number,
-//     previousPageData: PaginatedList<Reddit>,
-//   ) => {
-//     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.name}/reddit?page=${pageIndex + 1}`;
-//   };
+const RedditComponent = ({ stock }: { stock: Stock }) => {
+  const getKey = (
+    pageIndex: number,
+    previousPageData: PaginatedList<Reddit>,
+  ) => {
+    if (previousPageData && !previousPageData.items.length) return null;
+    return `/api/stock/${stock.ticker}/reddit?page=${pageIndex + 1}`;
+  };
 
-//   const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
-//     getKey,
-//     fetcher,
-//     { initialSize: 1 },
-//   );
+  const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
+    getKey,
+    fetcher,
+    { initialSize: 1 },
+  );
 
-//   const [reddit, setReddit] = useState<Reddit[]>([]);
-//   const [maxData, setMaxData] = useState(0);
+  const [reddit, setReddit] = useState<Reddit[]>([]);
+  const [maxData, setMaxData] = useState(0);
 
-//   useEffect(() => {
-//     if (data) {
-//       setReddit(data.map((paged) => paged.items).flat());
-//       setMaxData(data[0].total);
-//     }
-//   }, [data]);
+  useEffect(() => {
+    if (data) {
+      setReddit(data.map((paged) => paged.items).flat());
+      setMaxData(data[0].total);
+    }
+  }, [data]);
 
-//   return (
-//     <>
-//       <h3>Reddit Posts</h3>
-//       <div
-//         id="scrollableDiv"
-//         style={{
-//           height: 400,
-//           overflow: "auto",
-//           padding: "0 16px",
-//           border: "1px solid rgba(140, 140, 140, 0.35)",
-//         }}
-//       >
-//         {data && reddit ? (
-//           <InfiniteScroll
-//             dataLength={reddit.length}
-//             next={() => setSize(size + 1)}
-//             hasMore={reddit.length < maxData}
-//             loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-//             endMessage={<Divider plain>End</Divider>}
-//             scrollableTarget="scrollableDiv"
-//           >
-//             <List
-//               dataSource={reddit}
-//               renderItem={(item) => (
-//                 <List.Item key={item.author}>
-//                   <List.Item.Meta
-//                     title={<a href={item.url}>{item.author}</a>}
-//                     description={item.content}
-//                   />
-//                   <div>Score: {item.score}</div>
-//                 </List.Item>
-//               )}
-//             />
-//           </InfiniteScroll>
-//         ) : (
-//           ""
-//         )}
-//       </div>
-//     </>
-//   );
-// };
+  return (
+    <>
+      <h3>Reddit Posts</h3>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
+        }}
+      >
+        {data && reddit ? (
+          <InfiniteScroll
+            dataLength={reddit.length}
+            next={() => setSize(size + 1)}
+            hasMore={reddit.length < maxData}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            endMessage={<Divider plain>End</Divider>}
+            scrollableTarget="scrollableDiv"
+          >
+            <List
+              dataSource={reddit}
+              renderItem={(item) => (
+                <List.Item key={item.author}>
+                  <List.Item.Meta
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.author}
+                      </a>
+                    }
+                    description={item.content}
+                  />
+                  <div>Score: {item.score}</div>
+                </List.Item>
+              )}
+            />
+          </InfiniteScroll>
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
+};
 
 // const NewsComponent = ({ stock }: { stock: Stock }) => {
 //   const getKey = (pageIndex: number, previousPageData: PaginatedList<News>) => {
 //     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.name}/news?page=${pageIndex + 1}`;
+//     return `/api/stock/${stock.ticker}/news?page=${pageIndex + 1}`;
 //   };
 
 //   const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
@@ -258,7 +262,7 @@ const { Content, Footer } = Layout;
 //               renderItem={(item) => (
 //                 <List.Item key={item.headline}>
 //                   <List.Item.Meta
-//                     title={<a href={item.url}>{item.headline}</a>}
+//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
 //                     description={item.content}
 //                   />
 //                   <div>sentiment: {item.sentiment}</div>
@@ -286,11 +290,11 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
   }
 
   return (
-    <Space size={40} direction="vertical">
+    <Space size={40} direction="vertical" style={{ width: "100%" }}>
       <Profile stock={stock} />
       {/* <Tweets stock={stock} />
-      <NewsComponent stock={stock} />
-      <RedditComponent stock={stock} /> */}
+      <NewsComponent stock={stock} /> */}
+      <RedditComponent stock={stock} />
     </Space>
   );
 };
@@ -322,9 +326,9 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div>
+    <div style={{ width: "100%" }}>
       <h2>Home</h2>
-      <Space direction="vertical" size={30}>
+      <Space direction="vertical" size={30} style={{ width: "100%" }}>
         <AutoComplete
           options={options}
           style={{ width: 200 }}

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Dict, Literal, Optional, Union
 
 from pydantic import BaseModel
@@ -27,4 +27,27 @@ class StockStub(BaseModel):
         return cls(
             name=stock.name,
             ticker=stock.ticker,
+        )
+
+class Reddit(BaseModel):
+    title: str
+    content: str
+    timestamp: datetime
+    author: str
+    sentiment: Optional[str]
+    score: int
+    num_comments: int
+    url: str
+
+    @classmethod
+    def from_orm(cls, reddit: models.Reddit):
+        return cls(
+            title=reddit.title,
+            content=reddit.content,
+            timestamp=reddit.timestamp,
+            author=reddit.author,
+            sentiment=reddit.sentiment,
+            score=reddit.score,
+            num_comments=reddit.num_comments,
+            url=reddit.url,
         )
