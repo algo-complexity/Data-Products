@@ -1,28 +1,42 @@
-export type Researcher = {
+export type Stock = {
   name: string;
-  email: string | null;
-  citations: number | null;
-  scholar_id: string;
-  faculty: string | null;
-  interests: string[];
-  co_authors: string[];
-  publications: string[];
+  ticker: string;
 };
 
-export type ResearcherStub = {
+export type StockStub = {
   name: string;
-  email: string | null;
-  citations: number | null;
-  scholar_id: string;
-  faculty: string | null;
-  interests: string[];
-  co_authors: string[];
-  publications: string[];
+  ticker: string;
 };
 
-export type Citation = {
-  year: Date;
-  count: number;
+export type Tweet = {
+  content: string;
+  timestamp: Date;
+  author: string;
+  sentiment: string;
+  retweets: number;
+  comments: number;
+  likes: number;
+  hashtags: string;
+  url: string;
+};
+
+export type News = {
+  headline: string;
+  content: string;
+  url: string;
+  sentiment: string;
+  summary: string;
+};
+
+export type Reddit = {
+  title: string;
+  content: string;
+  timestamp: Date;
+  author: string;
+  sentiment: string;
+  score: number;
+  num_comments: number;
+  url: string;
 };
 
 export type PaginatedList<T> = {
@@ -31,52 +45,4 @@ export type PaginatedList<T> = {
   total: number;
   page: number;
   pages: number;
-};
-
-export type BarChartData = {
-  labels: any[];
-  datasets: {
-    label: string;
-    data: number[];
-    backgroundColor: string;
-  }[];
-};
-
-export type ResearcherWebsites = {
-  url: string;
-  type: "dr_ntu" | "dblp" | "linkedin" | "image" | "other";
-};
-
-export type Publication = {
-  title: string;
-  abstract: string;
-  num_citations: number;
-  year: Date | null;
-  paper_url: string | null;
-  conference: string | null;
-};
-
-export type InterestNode = {
-  id: string;
-  name: string;
-  type: "interest";
-};
-
-export type ProfNode = {
-  id: string;
-  name: string;
-  type: "prof";
-  data: Researcher;
-};
-
-export type Node = InterestNode | ProfNode;
-
-export type Link = {
-  source: string;
-  target: string;
-};
-
-export type GraphData = {
-  nodes: Node[];
-  links: Link[];
 };
