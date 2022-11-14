@@ -18,6 +18,9 @@ class Stock(models.Model):
     name = models.TextField()
     ticker = models.CharField(max_length=4, unique=True)
     summary = models.TextField()
+
+    def __str__(self) -> str:
+        return f"{self.name}: {self.ticker}"
     
 
 class Price(models.Model):

@@ -32,7 +32,7 @@ class Config(BaseSettings):
     database_host: str
     database_port: int = 5432
 
-    scraper_api_key: str
+    yahoo_finance_header_key: str
 
 
 # Lazily initialize the config variable using module-level __getattr__
