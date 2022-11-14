@@ -66,6 +66,9 @@ class Reddit(models.Model):
     url = models.URLField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
+    def __str__(self) -> str:
+        return f"{self.title}"
+
 class Indicator(models.Model):
     class Meta:
         indexes = [

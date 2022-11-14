@@ -7,3 +7,6 @@ class ApiConfig(AppConfig):
 
     def ready(self):
         super().ready()
+
+        # Implicitly connect a signal handlers decorated with @receiver.
+        from . import signals

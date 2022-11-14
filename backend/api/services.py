@@ -1,6 +1,11 @@
 from . import models
 from typing import Optional
 import pandas as pd
+import uuid
+
+import numpy as np
+import praw
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from requests import get
 from dataprod.config import Config, config
@@ -9,6 +14,10 @@ from django.utils.timezone import datetime, utc
 from django.db.models import QuerySet
 
 config: Config
+
+reddit = praw.Reddit(
+    client_id=config.reddit_client_id, client_secret=config.reddit_client_secret, user_agent=config.reddit_user_agent
+)
 
 
 base_url = "https://yh-finance.p.rapidapi.com"
@@ -83,10 +92,56 @@ def get_stock_from_yahoo(search: str) -> QuerySet:
             data = get_yahoo_stock_data(ticker)
             stock, _ = models.Stock.objects.update_or_create(ticker=data["ticker"], defaults=dict(name=data["name"], summary=data["summary"]))
 
-            # TODO: Add Extra code to calculate indicators
             if stock:
                 stock_data = get_yahoo_stock_price(ticker)
                 for _, _open, high, low, close, timestamp in stock_data.itertuples():
                     models.Price.objects.update_or_create(timestamp=timestamp, stock=stock, defaults=dict(open=_open, high=high, low=low, close=close))
             stock = models.Stock.objects.filter(ticker=ticker)
     return stock
+
+def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
+    """Fetches reddit posts and relevant information sentiment score.
+
+    Args:
+        subreddit (str): name of subreddit eg. "wallstreetbets"
+        symb (str): symbol to search for eg. "BBBY"
+        time (str, optional): Time period for fetching posts. Defaults to "week".
+
+    Returns:
+        DataFrame: Pandas df
+    """
+    posts = []
+    sent = SentimentIntensityAnalyzer()
+    for post in reddit.subreddit(subreddit).search(symb, time_filter=time):
+        if post.is_self:
+            posts.append(
+                [
+                    post.title,
+                    post.selftext,
+                    datetime.fromtimestamp(post.created, tz=utc),
+                    post.author.name,
+                    round(sent.polarity_scores(post.selftext)["compound"], 2),
+                    post.score,
+                    post.num_comments,
+                    post.url,
+                    post.id,
+                ]
+            )
+    df = pd.DataFrame(
+        posts,
+        columns=[
+            "title",
+            "content",
+            "timestamp",
+            "author",
+            "sentiment",
+            "score",
+            "num_comments",
+            "url",
+            "api_id",
+        ],
+    )
+    # remove rows with empty strings/null
+    df.replace("", np.nan, inplace=True)
+    df.dropna(inplace=True)
+    return df
