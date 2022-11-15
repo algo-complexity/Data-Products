@@ -60,7 +60,7 @@ def get_yahoo_stock_price(ticker: str) -> pd.DataFrame:
     querystring = {
         "interval": "1d",
         "symbol": ticker,
-        "range": "1mo",
+        "range": "6mo",
         "includeAdjustedClose": "true",
     }
 

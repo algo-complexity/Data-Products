@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now, timedelta
 from ninja import Router
 
 from schemas import PaginatedList, paginate
@@ -26,6 +27,12 @@ def get_researcher_search(request, q: str = None, page: int = 1, limit: int = 10
 def get_researcher_name(request, ticker: str):
     stock = get_object_or_404(models.Stock, ticker=ticker)
     return schemas.Stock.from_orm(stock)
+
+@router.get("/stock/{str:ticker}/price", response=list[schemas.Price])
+def get_researcher_name(request, ticker: str):
+    results = models.Price.objects.filter(stock__ticker=ticker, timestamp__gte=now() - timedelta(days=6*30))
+    return [schemas.Price.from_orm(price) for price in results]
+
 
 @router.get("/stock/{str:ticker}/reddit", response=PaginatedList[schemas.Reddit])
 def get_researcher_name(request, ticker: str, page: int = 1, limit: int = 10):

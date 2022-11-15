@@ -29,6 +29,25 @@ class StockStub(BaseModel):
             ticker=stock.ticker,
         )
 
+
+class Price(BaseModel):
+    open: float
+    high: float
+    low: float
+    close: float
+    timestamp: datetime
+
+    @classmethod
+    def from_orm(cls, price: models.Price):
+        return cls(
+            open=price.open,
+            high=price.high,
+            low=price.low,
+            close=price.close,
+            timestamp=price.timestamp,
+        )
+
+
 class Reddit(BaseModel):
     title: str
     content: str

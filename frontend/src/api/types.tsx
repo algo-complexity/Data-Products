@@ -28,6 +28,28 @@ export type News = {
   summary: string;
 };
 
+export type Price = {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  timestamp: Date;
+};
+
+export type ChartData<T> = {
+  label: string;
+  color: {
+    up: string;
+    down: string;
+    unchanged: string;
+  };
+  data: T[];
+};
+
+export type CandlestickData<T> = {
+  datasets: ChartData<T>[];
+};
+
 export type Reddit = {
   title: string;
   content: string;

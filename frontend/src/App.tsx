@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { HomeOutlined } from "@ant-design/icons";
 import {
   Layout,
   Space,
@@ -7,11 +8,18 @@ import {
   Divider,
   Skeleton,
   Card,
+  Menu,
 } from "antd";
 import "antd/dist/antd.css";
-import { fetcher, searchStock, useStock } from "./api/api";
-import { PaginatedList, Stock, Tweet, News, Reddit } from "./api/types";
-// import { Bar } from "react-chartjs-2";
+import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
+import {
+  PaginatedList,
+  Stock,
+  Tweet,
+  News,
+  Reddit,
+  CandlestickData,
+} from "./api/types";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -20,61 +28,101 @@ import {
   Title,
   Tooltip,
   Legend,
+  TimeSeriesScale,
+  FinancialDataPoint,
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useSWRInfinite from "swr/infinite";
+import { Candlestick } from "./components/typedCharts";
+import "chartjs-adapter-date-fns";
+import { CandlestickElement } from "chartjs-chart-financial";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  TimeSeriesScale,
   BarElement,
   Title,
   Tooltip,
   Legend,
+  CandlestickElement,
 );
 
-const { Content, Footer } = Layout;
+const { Content, Footer, Sider } = Layout;
 
-// const Citations = ({ researcher }: { researcher: Researcher }) => {
-//   const { citations } = useResearcherCitations(researcher.name);
-//   const [data, setData] = useState<BarChartData>({
-//     labels: [1, 2, 3, 4],
-//     datasets: [],
-//   });
+const StockPrice = ({ stock }: { stock: Stock }) => {
+  const { prices } = useStockPrice(stock.ticker);
+  const [data, setData] = useState<CandlestickData<FinancialDataPoint>>({
+    datasets: [
+      {
+        label: stock.name,
+        color: {
+          up: "#01ff01",
+          down: "#fe0000",
+          unchanged: "#999",
+        },
+        data: [
+          {
+            x: Date.now().valueOf(),
+            o: 5,
+            h: 7,
+            l: 3,
+            c: 5,
+          },
+        ],
+      },
+    ],
+  });
 
-//   useEffect(() => {
-//     if (citations) {
-//       setData({
-//         labels: citations.map((citation) =>
-//           new Date(citation.year).getFullYear(),
-//         ),
-//         datasets: [
-//           {
-//             label: researcher.name,
-//             data: citations.map((citation) => citation.count),
-//             backgroundColor: "rgba(255, 99, 132, 0.5)",
-//           },
-//         ],
-//       });
-//     }
-//   }, [citations, researcher.name]);
+  useEffect(() => {
+    if (prices) {
+      setData({
+        datasets: [
+          {
+            label: stock.name,
+            color: {
+              up: "#01ff01",
+              down: "#fe0000",
+              unchanged: "#999",
+            },
+            data: prices.map((price) => {
+              return {
+                x: new Date(price.timestamp).valueOf(),
+                o: price.open,
+                h: price.high,
+                l: price.low,
+                c: price.close,
+              };
+            }),
+          },
+        ],
+      });
+    }
+  }, [prices, stock.name]);
 
-//   const options = {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         position: "top" as const,
-//       },
-//       title: {
-//         display: true,
-//         text: "Number of Citations",
-//       },
-//     },
-//   };
-
-//   return <Bar options={options} data={data} width={600} height={500} />;
-// };
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: stock.name,
+      },
+    },
+  };
+  return (
+    <Candlestick
+      id="stockChart"
+      options={options}
+      data={data}
+      width={1200}
+      height={400}
+    />
+  );
+};
 
 // const Tweets = ({ stock }: { stock: Stock }) => {
 //   const getKey = (
@@ -283,7 +331,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
 };
 
 const Dashboard = ({ ticker }: { ticker: string }) => {
-  const { stock } = useStock(ticker);
+  var { stock } = useStock(ticker);
 
   if (!stock) {
     return <div>Please Select a Stock</div>;
@@ -291,7 +339,10 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
   return (
     <Space size={40} direction="vertical" style={{ width: "100%" }}>
-      <Profile stock={stock} />
+      <Space size={100}>
+        <Profile stock={stock} />
+        <StockPrice stock={stock} />
+      </Space>
       {/* <Tweets stock={stock} />
       <NewsComponent stock={stock} /> */}
       <RedditComponent stock={stock} />
@@ -326,25 +377,33 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <Space direction="vertical" size={30} style={{ width: "100%" }}>
       <h2>Home</h2>
-      <Space direction="vertical" size={30} style={{ width: "100%" }}>
-        <AutoComplete
-          options={options}
-          style={{ width: 200 }}
-          onSelect={onSelect}
-          onSearch={onSearch}
-          placeholder="Search stock"
-        />
-        <Dashboard ticker={ticker} />
-      </Space>
-    </div>
+      <AutoComplete
+        options={options}
+        style={{ width: 200 }}
+        onSelect={onSelect}
+        onSearch={onSearch}
+        placeholder="Search stock"
+      />
+      <Dashboard ticker={ticker} />
+    </Space>
   );
 };
 
 const App: React.FC = () => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      <Sider>
+        <div className="logo" style={{ color: "white", fontSize: 30 }}>
+          Stocks
+        </div>
+        <Menu theme="dark" defaultSelectedKeys={["home"]} mode="inline">
+          <Menu.Item key={"home"} icon={<HomeOutlined />} title={"Home"}>
+            Home
+          </Menu.Item>
+        </Menu>
+      </Sider>
       <Layout className="site-layout">
         <Content style={{ margin: "0 16px" }}>
           <div
