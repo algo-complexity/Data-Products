@@ -9,6 +9,7 @@ import {
   Skeleton,
   Card,
   Menu,
+  Image,
 } from "antd";
 import "antd/dist/antd.css";
 import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
@@ -37,6 +38,7 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import TSLA from "./logos/tsla.png";
 
 ChartJS.register(
   CategoryScale,
@@ -327,7 +329,12 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
 // };
 
 const Profile = ({ stock }: { stock: Stock }) => {
-  return <Card title={stock.name} size={"small"}></Card>;
+  return (
+    <Space style={{ display: "flex", flexDirection: "column" }}>
+      <Card title={stock.name} size={"small"}></Card>
+      <Image src={TSLA}></Image>
+    </Space>
+  );
 };
 
 const Dashboard = ({ ticker }: { ticker: string }) => {
