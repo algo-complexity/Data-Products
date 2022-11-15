@@ -70,3 +70,15 @@ class Reddit(BaseModel):
             num_comments=reddit.num_comments,
             url=reddit.url,
         )
+
+class Indicator(BaseModel):
+    name: str
+    value: float
+
+    @classmethod
+    def from_orm(cls, indicator: models.Indicator):
+        return cls(
+            name=indicator.name,
+            value=indicator.value,
+        )
+

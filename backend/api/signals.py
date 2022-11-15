@@ -7,11 +7,11 @@ import pandas as pd
 @receiver(post_save, sender=models.Stock)
 def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
     if created:
+        # Add Reddit
         df = pd.DataFrame()
         for subreddit in ["wallstreetbets", "superstonk"]:
             data = services.get_reddit_posts(subreddit, instance.ticker)
             df = pd.concat([df, data])
-        print("reddit df:", df)
         for args in df.itertuples(index=False):
             models.Reddit.objects.update_or_create(
                 api_id=args.api_id, 

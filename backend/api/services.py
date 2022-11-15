@@ -1,8 +1,10 @@
 from . import models
 from typing import Optional
 import pandas as pd
-import uuid
 
+from ta.trend import SMAIndicator, EMAIndicator, MACD
+from ta.momentum import RSIIndicator
+from ta.volatility import AverageTrueRange
 import numpy as np
 import praw
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -26,6 +28,31 @@ headers = {
     "X-RapidAPI-Host": "yh-finance.p.rapidapi.com",
 }
 
+def calculate_indices(stock: models.Stock):
+    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
+
+    # Initialise all the indicators
+    sma_50 = SMAIndicator(close=prices_df["close"], window=50)
+    sma_100 = SMAIndicator(close=prices_df["close"], window=100)
+    sma_200 = SMAIndicator(close=prices_df["close"], window=200)
+    ema_50 = EMAIndicator(close=prices_df["close"], window=50)
+    ema_100 = EMAIndicator(close=prices_df["close"], window=100)
+    ema_200 = EMAIndicator(close=prices_df["close"], window=200)
+    macd = MACD(close=prices_df["close"])
+    rsi = RSIIndicator(close=prices_df["close"])
+    atr = AverageTrueRange(high=prices_df["high"], low=prices_df["low"], close=prices_df["close"])
+    
+    models.Indicator.objects.update_or_create(stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="sma_100", defaults=dict(value=sma_100.sma_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="sma_200", defaults=dict(value=sma_200.sma_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="ema_100", defaults=dict(value=ema_100.ema_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="ema_200", defaults=dict(value=ema_200.ema_indicator().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1]))
+    models.Indicator.objects.update_or_create(stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1]))
+    
 
 def get_yahoo_autocomplete_stock_ticker(search: str) -> Optional[str]:
     response = get(f"{base_url}/auto-complete", headers=headers, params={"q": search})
@@ -60,7 +87,7 @@ def get_yahoo_stock_price(ticker: str) -> pd.DataFrame:
     querystring = {
         "interval": "1d",
         "symbol": ticker,
-        "range": "6mo",
+        "range": "2y",
         "includeAdjustedClose": "true",
     }
 
@@ -96,6 +123,7 @@ def get_stock_from_yahoo(search: str) -> QuerySet:
                 stock_data = get_yahoo_stock_price(ticker)
                 for _, _open, high, low, close, timestamp in stock_data.itertuples():
                     models.Price.objects.update_or_create(timestamp=timestamp, stock=stock, defaults=dict(open=_open, high=high, low=low, close=close))
+                calculate_indices(stock)
             stock = models.Stock.objects.filter(ticker=ticker)
     return stock
 

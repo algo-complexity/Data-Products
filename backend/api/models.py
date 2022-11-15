@@ -31,6 +31,9 @@ class Price(models.Model):
     timestamp = models.DateTimeField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
+    def __str__(self) -> str:
+        return f"{self.stock.name} @ {self.timestamp.strftime('%Y-%m-%d')}: Open {self.open}, High {self.high}, Low {self.low}, Close {self.close}"
+
 class News(models.Model):
 
     headline = models.TextField()
@@ -84,3 +87,6 @@ class Indicator(models.Model):
     name = models.TextField()
     value = models.DecimalField(max_digits=20, decimal_places=5)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.stock.name} @ {self.name}: {self.value}"

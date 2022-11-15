@@ -18,7 +18,7 @@ import {
   Tweet,
   News,
   Reddit,
-  CandlestickData,
+  ChartData,
 } from "./api/types";
 import {
   Chart as ChartJS,
@@ -53,7 +53,7 @@ const { Content, Footer, Sider } = Layout;
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
-  const [data, setData] = useState<CandlestickData<FinancialDataPoint>>({
+  const [data, setData] = useState<ChartData<FinancialDataPoint>>({
     datasets: [
       {
         label: stock.name,

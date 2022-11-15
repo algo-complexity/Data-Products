@@ -36,7 +36,7 @@ export type Price = {
   timestamp: Date;
 };
 
-export type ChartData<T> = {
+export type CandlestickData<T> = {
   label: string;
   color: {
     up: string;
@@ -46,8 +46,8 @@ export type ChartData<T> = {
   data: T[];
 };
 
-export type CandlestickData<T> = {
-  datasets: ChartData<T>[];
+export type ChartData<T> = {
+  datasets: CandlestickData<T>[];
 };
 
 export type Reddit = {
