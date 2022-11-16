@@ -29,7 +29,7 @@ headers = {
 }
 
 def calculate_indices(stock: models.Stock):
-    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")[:252]
     prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
 
     # Initialise all the indicators

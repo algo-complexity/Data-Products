@@ -37,6 +37,7 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import ReactMarkdown from "react-markdown";
 
 ChartJS.register(
   CategoryScale,
@@ -118,7 +119,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       id="stockChart"
       options={options}
       data={data}
-      width={1200}
+      width={600}
       height={400}
     />
   );
@@ -247,7 +248,7 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
                         {item.author}
                       </a>
                     }
-                    description={item.content}
+                    description={<ReactMarkdown>{item.content}</ReactMarkdown>}
                   />
                   <div>Score: {item.score}</div>
                 </List.Item>
