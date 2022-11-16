@@ -10,6 +10,7 @@ import {
   Card,
   Menu,
   Image,
+  Popover,
 } from "antd";
 import "antd/dist/antd.css";
 import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
@@ -38,7 +39,7 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
-import TSLA from "./logos/tsla.png";
+import removeMarkdown from "markdown-to-text";
 
 ChartJS.register(
   CategoryScale,
@@ -48,7 +49,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  CandlestickElement,
+  CandlestickElement
 );
 
 const { Content, Footer, Sider } = Layout;
@@ -196,7 +197,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Reddit>,
+    previousPageData: PaginatedList<Reddit>
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/reddit?page=${pageIndex + 1}`;
@@ -205,7 +206,7 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
     getKey,
     fetcher,
-    { initialSize: 1 },
+    { initialSize: 1 }
   );
 
   const [reddit, setReddit] = useState<Reddit[]>([]);
@@ -249,7 +250,7 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
                         {item.author}
                       </a>
                     }
-                    description={item.content}
+                    description={removeMarkdown(item.content)}
                   />
                   <div>Score: {item.score}</div>
                 </List.Item>
@@ -329,11 +330,24 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
 // };
 
 const Profile = ({ stock }: { stock: Stock }) => {
+  const content = (
+    <div style={{ height: "20vw", overflow: "hidden", overflowY: "auto" }}>
+      {stock.summary}
+    </div>
+  );
+
   return (
-    <Space style={{ display: "flex", flexDirection: "column" }}>
-      <Card title={stock.name} size={"small"}></Card>
-      <Image src={TSLA}></Image>
-    </Space>
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <Image src={stock.image_url ? stock.image_url : ""}></Image>
+      <Popover
+        placement="left"
+        content={content}
+        title={"About " + stock.name}
+        overlayStyle={{ width: "20vw" }}
+      >
+        <Card title={stock.name}></Card>
+      </Popover>
+    </div>
   );
 };
 
@@ -359,7 +373,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
 const Home: React.FC = () => {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    [],
+    []
   );
   const [ticker, setTicker] = useState("");
   const debounced = useDebouncedCallback((searchText) => {
@@ -370,7 +384,7 @@ const Home: React.FC = () => {
             value: stock.ticker,
             label: `${stock.name} (${stock.ticker})`,
           };
-        }),
+        })
       );
     });
   }, 1500);
