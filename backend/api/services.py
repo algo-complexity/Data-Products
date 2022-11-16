@@ -9,7 +9,9 @@ from ta.volatility import AverageTrueRange
 import numpy as np
 import praw
 import tweepy
-from gnews import GNews
+import requests
+import xml.etree.ElementTree as ET  # built in library
+from datetime import datetime
 
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from requests import get
@@ -33,6 +35,7 @@ headers = {
     "X-RapidAPI-Host": "yh-finance.p.rapidapi.com",
 }
 
+
 def calculate_indices(stock: models.Stock):
     prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
     prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
@@ -47,17 +50,31 @@ def calculate_indices(stock: models.Stock):
     macd = MACD(close=prices_df["close"])
     rsi = RSIIndicator(close=prices_df["close"])
     atr = AverageTrueRange(high=prices_df["high"], low=prices_df["low"], close=prices_df["close"])
-    
-    models.Indicator.objects.update_or_create(stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="sma_100", defaults=dict(value=sma_100.sma_indicator().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="sma_200", defaults=dict(value=sma_200.sma_indicator().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="ema_100", defaults=dict(value=ema_100.ema_indicator().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="ema_200", defaults=dict(value=ema_200.ema_indicator().iloc[-1]))
+
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="sma_100", defaults=dict(value=sma_100.sma_indicator().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="sma_200", defaults=dict(value=sma_200.sma_indicator().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="ema_100", defaults=dict(value=ema_100.ema_indicator().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="ema_200", defaults=dict(value=ema_200.ema_indicator().iloc[-1])
+    )
     models.Indicator.objects.update_or_create(stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1]))
     models.Indicator.objects.update_or_create(stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1]))
-    
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1])
+    )
+
 
 def calculate_indices(stock: models.Stock):
     prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
@@ -244,19 +261,75 @@ def get_tweets(query):
 
 
 # NEWS
-def get_news_headlines(query_symbol):
-    gn = GNews(language="en")
-    df = pd.DataFrame(gn.get_news(query_symbol))
-    df["published date"] = df["published date"].astype("datetime64")
+# functions from https://github.com/iAhsanJaved/FetchGoogleNews
+def get_news(search_term, data_filter=None):
+    """
+    Search through Google News with the "search_term" and get the headlines
+     and the contents of the news that was released today, this week, this month,
+    or this year ("date_filter").
+    """
 
-    # explode out publisher information
-    pub_df = pd.DataFrame(df["publisher"].values.tolist(), index=df.index)
-    df.drop(columns=["publisher", "description"], inplace=True)
-    pub_df.columns = ["homepage", "publisher"]
-    df = pd.concat((df, pub_df), axis=1)
+    def get_text(x):
+        start = x.find("<p>") + 3
+        end = x.find("</p>")
+        return x[start:end]
+
+    url = clean_url(search_term, data_filter)
+    response = requests.get(url)
+    # get the root directly as we have text file of string now
+    root = ET.fromstring(response.text)
+    # get the required data
+    title = [i.text for i in root.findall(".//channel/item/title")]
+    link = [i.text for i in root.findall(".//channel/item/link")]
+    description = [i.text for i in root.findall(".//channel/item/description")]
+    pubDate = [i.text for i in root.findall(".//channel/item/pubDate")]
+    source = [i.text for i in root.findall(".//channel/item/source")]
+    # clear the description
+    short_description = list(map(get_text, description))
+
+    # set the data frame
+    df = pd.DataFrame(
+        {"title": title, "link": link, "description": short_description, "date": pubDate, "source": source}
+    )
+    # adjust the date column
+    df.date = df.date.astype("datetime64")
+    # for saving purpose uncomment the below
+    df.to_csv(f"{search_term}_news.csv", encoding="utf-8-sig", index=False)
     return df
 
 
+def clean_url(searched_item, data_filter):
+    """
+    OUTPUT : url to be fecthed for the searched_item and data_filter
+     ---------------------------------------------------
+    Parameters:
+      today' - get headlines of the news that are released only in today
+                       'this_week' - get headlines of the news that are released in this week
+                       'this month' - news released in this month
+                       'this_year' - news released in this year
+                        number : int/str input for number of days ago
+                        or '' blank to get all data
+    """
+    x = datetime.today()
+    today = str(x)[:10]
+    yesterday = str(x + pd.Timedelta(days=-1))[:10]
+    this_week = str(x + pd.Timedelta(days=-7))[:10]
+    if data_filter == "today":
+        time = "after%3A" + yesterday
+    elif data_filter == "this_week":
+        time = "after%3A" + this_week + "+before%3A" + today
+    elif data_filter == "this_year":
+        time = "after%3A" + str(x.year - 1)
+    elif str(data_filter).isdigit():
+        temp_time = str(x + pd.Timedelta(days=-int(data_filter)))[:10]
+        time = "after%3A" + temp_time + "+before%3A" + today
+    else:
+        time = ""
+    url = f"https://news.google.com/rss/search?q={searched_item}+" + time + "&hl=en-US&ceid=US%3Aen"
+    return url
+
+
+# OTHERS
 def sentiment_analysis(df, col_name="text"):
     # Assigning Initial Values
     positive = 0

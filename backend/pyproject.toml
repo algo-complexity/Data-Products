@@ -31,7 +31,8 @@ django-ninja = "^0.19.1"
 praw = "^7.6.1"
 nltk = "^3.7"
 ta = "^0.10.2"
-gnews = "^0.2.7"
+tweepy = "^4.12.1"
+requests = "^2.28.1"
 
 [tool.poetry.dev-dependencies]
 autopep8 = "^1.6.0"
