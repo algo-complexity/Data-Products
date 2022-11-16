@@ -20,9 +20,7 @@ class Config(BaseSettings):
                 file_secret_settings,
             )
 
-    secret_key: str = (
-        "django-insecure-5-wh%*_hny_@&#b+7+snq*)tik)a-+q@#()^qlpgeco2f8q&*8"
-    )
+    secret_key: str = "django-insecure-5-wh%*_hny_@&#b+7+snq*)tik)a-+q@#()^qlpgeco2f8q&*8"
     debug: bool = True
     allowed_hosts: list = []
 
@@ -37,6 +35,11 @@ class Config(BaseSettings):
     reddit_client_id: str
     reddit_client_secret: str
     reddit_user_agent: str
+
+    twitter_api_key: str
+    twitter_api_secret: str
+    twitter_bearer_token: str
+
 
 # Lazily initialize the config variable using module-level __getattr__
 # so that we can import the Config class without triggering config load.
