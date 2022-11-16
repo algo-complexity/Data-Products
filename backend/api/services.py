@@ -244,20 +244,35 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
 def get_tweets(query):
     query = "\$" + query + " lang:en"
     tweets = twitter.search_recent_tweets(
-        query=query, tweet_fields=["author_id", "created_at", "public_metrics"], max_results=50
+        query=query, tweet_fields=["author_id", "created_at", "public_metrics", "entities"], max_results=100
     )
 
     tweets_df = pd.DataFrame(tweets.data)
+
+    # explode out public metrics
     pub_metrics = tweets_df["public_metrics"].apply(pd.Series)
-    tweets_df = pd.concat([tweets_df, pub_metrics], axis=1)
-    tweets_df.drop(columns=["public_metrics"], inplace=True)
+
+    # extract hashtags
+    entities = pd.json_normalize(tweets_df["entities"])
+    hashtags = []
+    for i in entities["hashtags"]:
+        hashtags_str = ""
+        if isinstance(i, list):
+            for j in i:
+                hashtags_str += j["tag"] + " "
+        hashtags.append(hashtags_str)
+    hashtags = pd.Series(hashtags).rename("hashtags")
+
+    tweets_df = pd.concat([tweets_df, hashtags, pub_metrics], axis=1)
+    tweets_df.drop(columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True)
     tweets_df["text"] = tweets_df["text"].apply(cleanTxt)
 
     # publicity score by summing pub metrics
     tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
+
     # sort by publicity
     tweets_df.sort_values(by="pub_score", ascending=False, inplace=True)
-    return tweets_df.sort_values(by="pub_score", ascending=False, inplace=True)
+    return tweets_df
 
 
 # NEWS
@@ -331,10 +346,7 @@ def clean_url(searched_item, data_filter):
 
 # OTHERS
 def sentiment_analysis(df, col_name="text"):
-    # Assigning Initial Values
-    positive = 0
-    negative = 0
-    neutral = 0
+
     # Creating empty lists
     tweet_list1 = []
     neutral_list = []
