@@ -47,7 +47,7 @@ class News(models.Model):
 
     headline = models.TextField()
     url = models.URLField()
-    # timestamp = models.DateTimeField(default=0)
+    timestamp = models.DateTimeField(default=0)
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     source = models.TextField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
