@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from api import models
 
+
 class Stock(BaseModel):
     name: str
     ticker: str
@@ -13,12 +14,8 @@ class Stock(BaseModel):
 
     @classmethod
     def from_orm(cls, stock: models.Stock):
-        return cls(
-            name=stock.name,
-            ticker=stock.ticker,
-            summary=stock.summary,
-            image_url=stock.image_url
-        )
+        return cls(name=stock.name, ticker=stock.ticker, summary=stock.summary, image_url=stock.image_url)
+
 
 class StockStub(BaseModel):
     name: str
@@ -55,7 +52,7 @@ class Reddit(BaseModel):
     content: str
     timestamp: datetime
     author: str
-    sentiment: Optional[str]
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
     score: int
     num_comments: int
     url: str
@@ -73,6 +70,55 @@ class Reddit(BaseModel):
             url=reddit.url,
         )
 
+
+class Tweet(BaseModel):
+    content: str
+    timestamp: datetime
+    author: str
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
+    retweets: int
+    replies: int
+    likes: int
+    quotes: int
+    pub_score: int
+    hashtags: list[str]
+    url: str
+
+    @classmethod
+    def from_orm(cls, tweet: models.Tweet):
+        return cls(
+            content=tweet.text,
+            timestamp=tweet.created_at,
+            author=tweet.author_id,
+            sentiment=tweet.sentiment,
+            retweets=tweet.retweet_count,
+            replies=tweet.reply_count,
+            likes=tweet.like_count,
+            quotes=tweet.quote_count,
+            pub_score=tweet.pub_score,
+            hashtags=tweet.hashtags
+            # hashtags split by space
+        )
+
+
+class News(BaseModel):
+    headline: str
+    url: str
+    timestamp: datetime
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
+    source: str
+
+    @classmethod
+    def from_orm(cls, news: models.News):
+        return cls(
+            headline=news.title,
+            url=news.link,
+            timestamp=news.date,
+            sentiment=news.sentiment,
+            source=news.source,
+        )
+
+
 class Indicator(BaseModel):
     name: str
     value: float
@@ -83,4 +129,3 @@ class Indicator(BaseModel):
             name=indicator.name,
             value=indicator.value,
         )
-
