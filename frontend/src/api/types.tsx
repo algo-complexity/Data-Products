@@ -1,6 +1,8 @@
 export type Stock = {
   name: string;
   ticker: string;
+  summary: string;
+  image_url: string | null;
 };
 
 export type StockStub = {
