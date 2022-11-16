@@ -9,13 +9,15 @@ class Stock(BaseModel):
     name: str
     ticker: str
     summary: str
+    image_url: Optional[str]
 
     @classmethod
     def from_orm(cls, stock: models.Stock):
         return cls(
             name=stock.name,
             ticker=stock.ticker,
-            summary=stock.summary
+            summary=stock.summary,
+            image_url=stock.image_url
         )
 
 class StockStub(BaseModel):
