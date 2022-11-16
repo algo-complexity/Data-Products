@@ -26,7 +26,7 @@ reddit = praw.Reddit(
     client_id=config.reddit_client_id, client_secret=config.reddit_client_secret, user_agent=config.reddit_user_agent
 )
 
-twitter = tweepy.Client(bearer_token=config.twi)
+twitter = tweepy.Client(bearer_token=config.twitter_bearer_token)
 
 
 base_url = "https://yh-finance.p.rapidapi.com"
