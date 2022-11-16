@@ -10,7 +10,8 @@ import {
   Card,
   Menu,
   Image,
-  Popover,
+  Typography,
+  Button,
 } from "antd";
 import "antd/dist/antd.css";
 import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
@@ -52,6 +53,7 @@ ChartJS.register(
   CandlestickElement
 );
 
+const { Paragraph, Text } = Typography;
 const { Content, Footer, Sider } = Layout;
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
@@ -330,23 +332,39 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
 // };
 
 const Profile = ({ stock }: { stock: Stock }) => {
-  const content = (
-    <div style={{ height: "20vw", overflow: "hidden", overflowY: "auto" }}>
-      {stock.summary}
-    </div>
-  );
+  const content = <div>{stock.summary}</div>;
+  const [ellipsis, setEllipsis] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const typoMore = () => {
+    setEllipsis(true);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
+  const typoLess = () => {
+    setEllipsis(false);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "row" }}>
       <Image src={stock.image_url ? stock.image_url : ""}></Image>
-      <Popover
-        placement="left"
-        content={content}
-        title={"About " + stock.name}
-        overlayStyle={{ width: "20vw" }}
-      >
-        <Card title={stock.name}></Card>
-      </Popover>
+      <Card title={stock.name}>
+        <Paragraph
+          style={{ width: "10vw" }}
+          key={key}
+          ellipsis={{
+            rows: 2,
+            expandable: true,
+            onExpand: typoMore,
+            symbol: "more",
+          }}
+        >
+        {stock.summary}
+        </Paragraph>
+        {ellipsis && <a onClick={typoLess}>less</a>}
+      </Card>
     </div>
   );
 };
