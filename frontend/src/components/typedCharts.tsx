@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import { Chart as ChartJS } from "chart.js";
 import type { ChartType, ChartComponentLike } from "chart.js";
 import { CandlestickController } from "chartjs-chart-financial";
+import { MatrixController } from "chartjs-chart-matrix";
 
 import {
   ChartProps,
@@ -24,4 +25,9 @@ function createTypedChart<T extends ChartType>(
 export const Candlestick = /* #__PURE__ */ createTypedChart(
   "candlestick",
   CandlestickController,
+);
+
+export const Matrix = /* #__PURE__ */ createTypedChart(
+  "matrix",
+  MatrixController,
 );

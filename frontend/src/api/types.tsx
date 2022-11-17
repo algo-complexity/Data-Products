@@ -1,6 +1,9 @@
+import { ScriptableContext } from "chart.js";
+
 export type Stock = {
   name: string;
   ticker: string;
+  summary: string;
 };
 
 export type StockStub = {
@@ -36,6 +39,20 @@ export type Price = {
   timestamp: Date;
 };
 
+export type Indicator = {
+  name:
+    | "sma_50"
+    | "sma_100"
+    | "sma_200"
+    | "ema_50"
+    | "ema_100"
+    | "ema_200"
+    | "macd"
+    | "rsi"
+    | "atr";
+  value: number;
+};
+
 export type CandlestickData<T> = {
   label: string;
   color: {
@@ -46,8 +63,24 @@ export type CandlestickData<T> = {
   data: T[];
 };
 
+export type CategoricalMatrixDataPoint = {
+  x: string;
+  y: string;
+  v: number;
+};
+
+export type MatrixData<T> = {
+  label: string;
+  data: T[];
+  backgroundColor: string | ((context: ScriptableContext<"matrix">) => string);
+  borderColor: string | ((context: ScriptableContext<"matrix">) => string);
+  width: number | ((context: ScriptableContext<"matrix">) => number);
+  height: number | ((context: ScriptableContext<"matrix">) => number);
+  borderWidth: number | ((context: ScriptableContext<"matrix">) => number);
+};
+
 export type ChartData<T> = {
-  datasets: CandlestickData<T>[];
+  datasets: T[];
 };
 
 export type Reddit = {

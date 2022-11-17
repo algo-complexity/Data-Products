@@ -11,7 +11,13 @@ import {
   Menu,
 } from "antd";
 import "antd/dist/antd.css";
-import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
+import {
+  fetcher,
+  searchStock,
+  useStock,
+  useStockIndicator,
+  useStockPrice,
+} from "./api/api";
 import {
   PaginatedList,
   Stock,
@@ -19,6 +25,9 @@ import {
   News,
   Reddit,
   ChartData,
+  CandlestickData,
+  MatrixData,
+  CategoricalMatrixDataPoint,
 } from "./api/types";
 import {
   Chart as ChartJS,
@@ -34,9 +43,10 @@ import {
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useSWRInfinite from "swr/infinite";
-import { Candlestick } from "./components/typedCharts";
+import { Candlestick, Matrix } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import { MatrixElement } from "chartjs-chart-matrix";
 
 ChartJS.register(
   CategoryScale,
@@ -47,13 +57,112 @@ ChartJS.register(
   Tooltip,
   Legend,
   CandlestickElement,
+  MatrixElement,
 );
 
 const { Content, Footer, Sider } = Layout;
 
+const Indicators = ({ stock }: { stock: Stock }) => {
+  const { indicators } = useStockIndicator(stock.ticker);
+  const [data, setData] = useState<
+    ChartData<MatrixData<CategoricalMatrixDataPoint>>
+  >({
+    datasets: [
+      {
+        label: stock.name,
+        data: [],
+        backgroundColor: "#000000",
+        borderColor: "#000000",
+        width: 5,
+        height: 5,
+        borderWidth: 5,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (indicators) {
+      setData({
+        datasets: [
+          {
+            label: stock.name,
+            backgroundColor: "#D0FF00",
+            borderColor: "#D0FF00",
+            width: ({ chart, dataset }) =>
+              chart.chartArea.width / dataset.data.length,
+            height: ({ chart }) => chart.chartArea.height,
+            borderWidth: 5,
+            data: indicators.map((indicator) => {
+              return {
+                x: indicator.name,
+                y: "indicator",
+                v: indicator.value,
+              };
+            }),
+          },
+        ],
+      });
+    }
+  }, [indicators, stock.name]);
+
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: stock.name,
+      },
+      scales: {
+        x: {
+          type: "category",
+          labels: [
+            "sma_50",
+            "sma_100",
+            "sma_200",
+            "ema_50",
+            "ema_100",
+            "ema_200",
+            "macd",
+            "rsi",
+            "atr",
+          ],
+          ticks: {
+            display: true,
+          },
+          grid: {
+            display: false,
+          },
+        },
+        y: {
+          type: "category",
+          labels: ["indicator"],
+          offset: true,
+          ticks: {
+            display: true,
+          },
+          grid: {
+            display: false,
+          },
+        },
+      },
+    },
+  };
+  return (
+    <Matrix
+      id="indicatorsChart"
+      options={options}
+      data={data}
+      width={600}
+      height={400}
+    />
+  );
+};
+
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
-  const [data, setData] = useState<ChartData<FinancialDataPoint>>({
+  const [data, setData] = useState<
+    ChartData<CandlestickData<FinancialDataPoint>>
+  >({
     datasets: [
       {
         label: stock.name,
@@ -62,15 +171,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
           down: "#fe0000",
           unchanged: "#999",
         },
-        data: [
-          {
-            x: Date.now().valueOf(),
-            o: 5,
-            h: 7,
-            l: 3,
-            c: 5,
-          },
-        ],
+        data: [],
       },
     ],
   });
@@ -118,7 +219,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       id="stockChart"
       options={options}
       data={data}
-      width={1200}
+      width={600}
       height={400}
     />
   );
@@ -342,6 +443,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
       <Space size={100}>
         <Profile stock={stock} />
         <StockPrice stock={stock} />
+        <Indicators stock={stock} />
       </Space>
       {/* <Tweets stock={stock} />
       <NewsComponent stock={stock} /> */}
