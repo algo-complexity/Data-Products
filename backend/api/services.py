@@ -7,6 +7,7 @@ from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
 import numpy as np
 import praw
+from serpapi import GoogleSearch
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 from requests import get
@@ -173,3 +174,19 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
     df.replace("", np.nan, inplace=True)
     df.dropna(inplace=True)
     return df
+
+def get_image_url(query):
+    params = {
+      'q': query,
+      'tbm': 'isch',
+      'ijn': '0',
+      'api_key': config.google_api_key
+    }
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    suggested = results['suggested_searches']
+    image_url = [result for result in suggested if result['name'] == 'logo']
+    if image_url:
+        return image_url[0]['thumbnail']
+    return 'https://static.thenounproject.com/png/3674270-200.png'

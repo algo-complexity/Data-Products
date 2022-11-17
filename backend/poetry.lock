@@ -272,6 +272,17 @@ docs = ["furo (>=2022.6.21)", "sphinx (>=5.1.1)", "sphinx-autodoc-typehints (>=1
 testing = ["covdefaults (>=2.2)", "coverage (>=6.4.2)", "pytest (>=7.1.2)", "pytest-cov (>=3)", "pytest-timeout (>=2.1)"]
 
 [[package]]
+name = "google-search-results"
+version = "2.4.1"
+description = "Scrape and search localized results from Google, Bing, Baidu, Yahoo, Yandex, Ebay, Homedepot, youtube at scale using SerpApi.com"
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+requests = "*"
+
+[[package]]
 name = "googlesearch-python"
 version = "1.1.0"
 description = "A Python library for scraping the Google search engine."
@@ -1142,7 +1153,7 @@ brotli = ["Brotli"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "b598b3e4e9b1195cd56366b5e9a61feaf9f9c7eeef4576338d52797d5063a67d"
+content-hash = "0a86da6b21cd94ee290a582b37a05d6b62e09b5890eee83364ca0ac63396c483"
 
 [metadata.files]
 appnope = [
@@ -1288,6 +1299,9 @@ executing = [
 filelock = [
     {file = "filelock-3.8.0-py3-none-any.whl", hash = "sha256:617eb4e5eedc82fc5f47b6d61e4d11cb837c56cb4544e39081099fa17ad109d4"},
     {file = "filelock-3.8.0.tar.gz", hash = "sha256:55447caa666f2198c5b6b13a26d2084d26fa5b115c00d065664b2124680c4edc"},
+]
+google-search-results = [
+    {file = "google_search_results-2.4.1.tar.gz", hash = "sha256:021746fc21c0b0786e61a2d103d93a08c5c84e204d3f93cd4d589e0e117614a7"},
 ]
 googlesearch-python = [
     {file = "googlesearch_python-1.1.0-py3-none-any.whl", hash = "sha256:34c7c96759d805c49ce5547f9ed5c9ecb80d35bb4f4a12f52edba1d3dd7fd03d"},

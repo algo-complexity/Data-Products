@@ -27,3 +27,12 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                     stock=instance
                 )
             )
+
+        models.Stock.objects.update_or_create(
+            ticker=instance.ticker,
+            defaults=dict(
+                name=instance.name,
+                summary=instance.summary,
+                image_url=services.get_image_url(instance.name)
+            )
+        )
