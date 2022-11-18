@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.utils.timezone import now, timedelta
 from ninja import Router
 
 from schemas import PaginatedList, paginate
@@ -7,6 +6,7 @@ from schemas import PaginatedList, paginate
 from . import models, schemas, services
 
 router = Router()
+
 
 @router.get("/stock", response=PaginatedList[schemas.Stock])
 def get_stocks(request, page: int = 1, limit: int = 10):
@@ -23,14 +23,18 @@ def get_stock_search(request, q: str = None, page: int = 1, limit: int = 10):
             results = services.get_stock_from_yahoo(q)
     return paginate(results, schemas.StockStub, page, limit)
 
+
 @router.get("/stock/{str:ticker}", response=schemas.Stock)
 def get_stock(request, ticker: str):
     stock = get_object_or_404(models.Stock, ticker=ticker)
     return schemas.Stock.from_orm(stock)
 
+
 @router.get("/stock/{str:ticker}/price", response=list[schemas.Price])
 def get_stock_price(request, ticker: str):
-    results = models.Price.objects.filter(stock__ticker=ticker).order_by("-timestamp")[:252]
+    results = models.Price.objects.filter(stock__ticker=ticker).order_by("-timestamp")[
+        :252
+    ]
     return [schemas.Price.from_orm(price) for price in results]
 
 
@@ -38,6 +42,7 @@ def get_stock_price(request, ticker: str):
 def get_stock_reddit(request, ticker: str, page: int = 1, limit: int = 10):
     results = models.Reddit.objects.filter(stock__ticker=ticker)
     return paginate(results, schemas.Reddit, page, limit)
+
 
 @router.get("/stock/{str:ticker}/indicators", response=list[schemas.Indicator])
 def get_stock_indicators(request, ticker: str):

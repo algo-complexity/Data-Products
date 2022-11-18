@@ -9,4 +9,4 @@ class ApiConfig(AppConfig):
         super().ready()
 
         # Implicitly connect a signal handlers decorated with @receiver.
-        from . import signals
+        from . import signals  # noqa: F401
