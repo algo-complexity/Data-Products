@@ -14,6 +14,7 @@ export type Tweet = {
   content: string;
   timestamp: Date;
   author: number;
+  url: string;
   sentiment: "positive" | "negative" | "neutral" | null;
   retweets: number;
   replies: number;

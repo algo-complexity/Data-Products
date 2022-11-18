@@ -59,6 +59,7 @@ class Tweet(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField()
     author = models.TextField()
+    url = models.URLField()
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     retweets = models.PositiveIntegerField()
     replies = models.PositiveIntegerField()

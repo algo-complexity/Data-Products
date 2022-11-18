@@ -90,13 +90,14 @@ class Tweet(BaseModel):
             content=tweet.text,
             timestamp=tweet.created_at,
             author=tweet.author_id,
+            url=tweet.url,
             sentiment=tweet.sentiment,
             retweets=tweet.retweet_count,
             replies=tweet.reply_count,
             likes=tweet.like_count,
             quotes=tweet.quote_count,
             pub_score=tweet.pub_score,
-            hashtags=tweet.hashtags
+            hashtags=tweet.hashtags  # TODO: SPLIT BY SPACE
             # hashtags split by space
         )
 

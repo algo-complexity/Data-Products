@@ -244,7 +244,7 @@ def get_tweets(query) -> pd.DataFrame:
     """Returns a dataframe of tweets matching a given search query.
 
     Args:
-        query (str): Search query eg. $AAPL
+        query (str): Search query eg. AAPL
 
     Returns:
         pd.DataFrame: DataFrame of tweets and other relevant information.
@@ -273,6 +273,7 @@ def get_tweets(query) -> pd.DataFrame:
     tweets_df = pd.concat([tweets_df, hashtags, pub_metrics], axis=1)
     tweets_df.drop(columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True)
     tweets_df["text"] = tweets_df["text"].apply(cleanTxt)
+    tweets_df["url"] = tweets_df["id"].apply(lambda x: "https://twitter.com/twitter/status/" + str(x))
 
     # publicity score by summing pub metrics
     tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
