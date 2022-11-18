@@ -1,7 +1,8 @@
-from . import models, services
+import pandas as pd
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import pandas as pd
+
+from . import models, services
 
 
 @receiver(post_save, sender=models.Stock)
@@ -14,16 +15,16 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
             df = pd.concat([df, data])
         for args in df.itertuples(index=False):
             models.Reddit.objects.update_or_create(
-                api_id=args.api_id, 
+                api_id=args.api_id,
                 defaults=dict(
-                    title=args.title, 
+                    title=args.title,
                     content=args.content,
                     timestamp=args.timestamp,
                     author=args.author,
                     sentiment=args.sentiment,
                     score=args.score,
                     num_comments=args.num_comments,
-                    url=args.url, 
-                    stock=instance
-                )
+                    url=args.url,
+                    stock=instance,
+                ),
             )
