@@ -55,7 +55,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  CandlestickElement
+  CandlestickElement,
 );
 
 const { Paragraph, Text } = Typography;
@@ -204,7 +204,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Reddit>
+    previousPageData: PaginatedList<Reddit>,
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/reddit?page=${pageIndex + 1}`;
@@ -213,7 +213,7 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
     getKey,
     fetcher,
-    { initialSize: 1 }
+    { initialSize: 1 },
   );
 
   const [reddit, setReddit] = useState<Reddit[]>([]);
@@ -431,7 +431,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
 const Home: React.FC = () => {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    []
+    [],
   );
   const [ticker, setTicker] = useState("");
   const debounced = useDebouncedCallback((searchText) => {
@@ -442,7 +442,7 @@ const Home: React.FC = () => {
             value: stock.ticker,
             label: `${stock.name} (${stock.ticker})`,
           };
-        })
+        }),
       );
     });
   }, 1500);
