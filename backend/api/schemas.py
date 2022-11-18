@@ -1,9 +1,10 @@
-from datetime import date, datetime
-from typing import Dict, Literal, Optional, Union
+from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
 from api import models
+
 
 class Stock(BaseModel):
     name: str
@@ -12,11 +13,8 @@ class Stock(BaseModel):
 
     @classmethod
     def from_orm(cls, stock: models.Stock):
-        return cls(
-            name=stock.name,
-            ticker=stock.ticker,
-            summary=stock.summary
-        )
+        return cls(name=stock.name, ticker=stock.ticker, summary=stock.summary)
+
 
 class StockStub(BaseModel):
     name: str
@@ -71,6 +69,7 @@ class Reddit(BaseModel):
             url=reddit.url,
         )
 
+
 class Indicator(BaseModel):
     name: str
     value: float
@@ -81,4 +80,3 @@ class Indicator(BaseModel):
             name=indicator.name,
             value=indicator.value,
         )
-

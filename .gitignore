@@ -18,3 +18,4 @@ coverage.xml
 /media/**
 
 node_modules/
+build/
