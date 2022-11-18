@@ -27,3 +27,26 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                     stock=instance,
                 ),
             )
+
+        # Add Twitter
+        df = pd.DataFrame()
+        data = services.get_tweets(instance.ticker)
+        df = pd.concat([df, data])
+        for args in df.itertuples(index=False):
+            models.Tweet.objects.update_or_create(
+                api_id=0, # TODO make api_id schema unique in models.py
+                defaults=dict(
+                    content = args.text,
+                    timestamp = args.created_at,
+                    author = args.author_id,
+                    url = args.url,
+                    sentiment = args.sentiment,
+                    retweets = args.retweet_count,
+                    replies = args.reply_count,
+                    likes = args.like_count,
+                    quotes = args.quote_count,
+                    pub_score = args.pub_score,
+                    hashtags = args.hashtags,
+                    stock = instance
+                ),
+            )
