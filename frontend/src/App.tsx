@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { HomeOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  LikeOutlined,
+  DislikeOutlined,
+  LineOutlined,
+} from "@ant-design/icons";
 import {
   Layout,
   Space,
@@ -214,6 +219,13 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   const [reddit, setReddit] = useState<Reddit[]>([]);
   const [maxData, setMaxData] = useState(0);
 
+  const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
+    <Space>
+      {React.createElement(icon)}
+      {text}
+    </Space>
+  );
+
   useEffect(() => {
     if (data) {
       setReddit(data.map((paged) => paged.items).flat());
@@ -242,19 +254,47 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText icon={LikeOutlined} text="10" />
+                  <IconText icon={LineOutlined} text="20" />
+                  <IconText icon={DislikeOutlined} text="30" />
+                </Space>
+              </>
+            }
             <List
               dataSource={reddit}
+              itemLayout="vertical"
               renderItem={(item) => (
-                <List.Item key={item.author}>
+                <List.Item
+                  key={item.author}
+                  actions={[
+                    item.sentiment && <IconText icon={LikeOutlined} text="1" />,
+                    item.sentiment && <IconText icon={LineOutlined} text="2" />,
+                    item.sentiment && (
+                      <IconText icon={DislikeOutlined} text="3" />
+                    ),
+                  ]}
+                >
                   <List.Item.Meta
                     title={
                       <a target="_blank" rel="noreferrer" href={item.url}>
                         {item.author}
                       </a>
                     }
-                    description={removeMarkdown(item.content)}
+                    description={
+                      <Space size={40}>
+                        <div>Score: {item.score}</div>
+                        <div>Commments: {item.num_comments}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
                   />
-                  <div>Score: {item.score}</div>
+                  {removeMarkdown(item.content)}
                 </List.Item>
               )}
             />
@@ -361,7 +401,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
             symbol: "more",
           }}
         >
-        {stock.summary}
+          {stock.summary}
         </Paragraph>
         {ellipsis && <a onClick={typoLess}>less</a>}
       </Card>
