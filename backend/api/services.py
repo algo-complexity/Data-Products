@@ -204,7 +204,6 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
         DataFrame: Pandas df
     """
     posts = []
-    sent = SentimentIntensityAnalyzer()
     for post in reddit.subreddit(subreddit).search(symb, time_filter=time):
         if post.is_self:
             posts.append(
@@ -213,7 +212,7 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
                     post.selftext,
                     datetime.fromtimestamp(post.created, tz=utc),
                     post.author.name,
-                    round(sent.polarity_scores(post.selftext)["compound"], 2),
+                    get_sentiment(post.selftext),
                     post.score,
                     post.num_comments,
                     post.url,
@@ -241,7 +240,15 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
 
 
 # TWEETS
-def get_tweets(query):
+def get_tweets(query) -> pd.DataFrame:
+    """Returns a dataframe of tweets matching a given search query.
+
+    Args:
+        query (str): Search query eg. $AAPL
+
+    Returns:
+        pd.DataFrame: DataFrame of tweets and other relevant information.
+    """
     query = "\$" + query + " lang:en"
     tweets = twitter.search_recent_tweets(
         query=query, tweet_fields=["author_id", "created_at", "public_metrics", "entities"], max_results=100
@@ -269,6 +276,7 @@ def get_tweets(query):
 
     # publicity score by summing pub metrics
     tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
+    tweets_df["sentiment"] = tweets_df["text"].apply(lambda x: get_sentiment(x))
 
     # sort by publicity
     tweets_df.sort_values(by="pub_score", ascending=False, inplace=True)
@@ -277,11 +285,17 @@ def get_tweets(query):
 
 # NEWS
 # functions from https://github.com/iAhsanJaved/FetchGoogleNews
-def get_news(search_term, data_filter=None):
-    """
-    Search through Google News with the "search_term" and get the headlines
-     and the contents of the news that was released today, this week, this month,
+def get_news(search_term, data_filter=None) -> pd.DataFrame:
+    """Search through Google News with the "search_term" and get the headlines
+    and the contents of the news that was released today, this week, this month,
     or this year ("date_filter").
+
+    Args:
+        search_term (str): Symbol/search query to search
+        data_filter (str, optional): Date window - "today", "this_week", "this_month", "this_year". Defaults to None.
+
+    Returns:
+        pd.DataFrame: DataFrame of news and other relevant information.
     """
 
     def get_text(x):
@@ -308,8 +322,7 @@ def get_news(search_term, data_filter=None):
     )
     # adjust the date column
     df.date = df.date.astype("datetime64")
-    # for saving purpose uncomment the below
-    df.to_csv(f"{search_term}_news.csv", encoding="utf-8-sig", index=False)
+    df.sentiment = df.title.apply(lambda x: get_sentiment(x))
     return df
 
 
@@ -345,29 +358,27 @@ def clean_url(searched_item, data_filter):
 
 
 # OTHERS
-def sentiment_analysis(df, col_name="text"):
+def get_sentiment(text):
+    """Returns a discrete value (pos/neg/neutral) describing the sentiment of a given input text.
 
-    # Creating empty lists
-    tweet_list1 = []
-    neutral_list = []
-    negative_list = []
-    positive_list = []
+    Args:
+        text (str): Input text to analyze.
+
+    Returns:
+        str: One of ("positive", "negative", "neutral")
+    """
 
     # Iterating over the tweets in the dataframe
-    for tweet in df[col_name]:
-        tweet_list1.append(tweet)
-        analyzer = SentimentIntensityAnalyzer().polarity_scores(tweet)
-        neg = analyzer["neg"]
-        pos = analyzer["pos"]
+    analyzer = SentimentIntensityAnalyzer().polarity_scores(text)
+    neg = analyzer["neg"]
+    pos = analyzer["pos"]
 
-        if neg > pos:
-            negative_list.append(tweet)  # appending the tweet that satisfies this condition
-        elif pos > neg:
-            positive_list.append(tweet)  # appending the tweet that satisfies this condition
-        elif pos == neg:
-            neutral_list.append(tweet)  # appending the tweet that satisfies this condition
-
-    return positive_list, negative_list, neutral_list
+    if neg > pos:
+        return "negative"
+    elif pos > neg:
+        return "positive"
+    elif pos == neg:
+        return "neutral"
 
 
 def cleanTxt(text):
