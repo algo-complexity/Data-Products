@@ -277,7 +277,7 @@ def get_tweets(query) -> pd.DataFrame:
 
     # publicity score by summing pub metrics
     tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
-    tweets_df["sentiment"] = tweets_df["text"].apply(lambda x: get_sentiment(x))
+    tweets_df["sentiment"] = tweets_df["text"].apply(get_sentiment)
 
     # sort by publicity
     tweets_df.sort_values(by="pub_score", ascending=False, inplace=True)

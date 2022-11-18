@@ -55,7 +55,7 @@ class News(models.Model):
 
 class Tweet(models.Model):
     # TODO: figure out how to make this unique?
-    api_id = models.PositiveBigIntegerField(null=True)
+    api_id = models.PositiveBigIntegerField(unique=True)
     content = models.TextField()
     timestamp = models.DateTimeField()
     author = models.TextField()
