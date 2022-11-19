@@ -44,9 +44,8 @@ class SentimentChoices(models.TextChoices):
 
 
 class News(models.Model):
-
     headline = models.TextField()
-    url = models.URLField()
+    url = models.URLField(unique=True)
     timestamp = models.DateTimeField()
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     source = models.TextField()
@@ -54,7 +53,6 @@ class News(models.Model):
 
 
 class Tweet(models.Model):
-    # TODO: figure out how to make this unique?
     api_id = models.PositiveBigIntegerField(unique=True)
     content = models.TextField()
     timestamp = models.DateTimeField()

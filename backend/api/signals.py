@@ -30,12 +30,10 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
             )
 
         # Add Twitter
-        df = pd.DataFrame()
-        data = services.get_tweets(instance.ticker)
-        df = pd.concat([df, data])
+        df = services.get_tweets(instance.ticker)
         for args in df.itertuples(index=False):
             models.Tweet.objects.update_or_create(
-                api_id=0,  # TODO make api_id schema unique in models.py
+                api_id=args.id,
                 defaults=dict(
                     content=args.text,
                     timestamp=args.created_at,
@@ -53,16 +51,15 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
             )
 
         # Add News
-        df = pd.DataFrame()
-        data = services.get_news(instance.ticker)
-        df = pd.concat([df, data])
+        df = services.get_news(instance.ticker)
         for args in df.itertuples(index=False):
             models.News.objects.update_or_create(
+                url=args.link,
                 defaults=dict(
                     headline=args.title,
-                    url=args.link,
                     timestamp=args.date,
                     sentiment=args.sentiment,
                     source=args.source,
+                    stock=instance,
                 ),
             )

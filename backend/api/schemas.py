@@ -102,8 +102,7 @@ class Tweet(BaseModel):
             likes=tweet.like_count,
             quotes=tweet.quote_count,
             pub_score=tweet.pub_score,
-            hashtags=tweet.hashtags  # TODO: SPLIT BY SPACE
-            # hashtags split by space
+            hashtags=tweet.hashtags.split(),
         )
 
 

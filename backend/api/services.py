@@ -8,7 +8,7 @@ import praw
 import requests
 import tweepy
 from django.db.models import QuerySet
-from django.utils.timezone import datetime, utc
+from django.utils.timezone import datetime, timedelta, utc
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from requests import get
 from ta.momentum import RSIIndicator
@@ -249,11 +249,8 @@ def get_tweets(query) -> pd.DataFrame:
     entities = pd.json_normalize(tweets_df["entities"])
     hashtags = []
     for i in entities["hashtags"]:
-        hashtags_str = ""
         if isinstance(i, list):
-            for j in i:
-                hashtags_str += j["tag"] + " "
-        hashtags.append(hashtags_str)
+            hashtags.append(" ".join([j["tag"] for j in i]))
     hashtags = pd.Series(hashtags).rename("hashtags")
 
     tweets_df = pd.concat([tweets_df, hashtags, pub_metrics], axis=1)
@@ -338,9 +335,9 @@ def clean_url(searched_item, data_filter):
                         or '' blank to get all data
     """
     x = datetime.today()
-    today = str(x)[:10]
-    yesterday = str(x + pd.Timedelta(days=-1))[:10]
-    this_week = str(x + pd.Timedelta(days=-7))[:10]
+    today = x.date().isoformat()
+    yesterday = (x - timedelta(days=1)).date().isoformat()
+    this_week = (x - timedelta(days=7)).date().isoformat()
     if data_filter == "today":
         time = "after%3A" + yesterday
     elif data_filter == "this_week":
