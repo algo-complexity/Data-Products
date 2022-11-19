@@ -28,3 +28,38 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                     stock=instance,
                 ),
             )
+
+        # Add Twitter
+        df = services.get_tweets(instance.ticker)
+        for args in df.itertuples(index=False):
+            models.Tweet.objects.update_or_create(
+                api_id=args.id,
+                defaults=dict(
+                    content=args.text,
+                    timestamp=args.created_at,
+                    author=args.author_id,
+                    url=args.url,
+                    sentiment=args.sentiment,
+                    retweets=args.retweet_count,
+                    replies=args.reply_count,
+                    likes=args.like_count,
+                    quotes=args.quote_count,
+                    pub_score=args.pub_score,
+                    hashtags=args.hashtags,
+                    stock=instance,
+                ),
+            )
+
+        # Add News
+        df = services.get_news(instance.ticker)
+        for args in df.itertuples(index=False):
+            models.News.objects.update_or_create(
+                url=args.link,
+                defaults=dict(
+                    headline=args.title,
+                    timestamp=args.date,
+                    sentiment=args.sentiment,
+                    source=args.source,
+                    stock=instance,
+                ),
+            )

@@ -1,6 +1,8 @@
 export type Stock = {
   name: string;
   ticker: string;
+  summary: string;
+  image_url: string | null;
 };
 
 export type StockStub = {
@@ -11,21 +13,23 @@ export type StockStub = {
 export type Tweet = {
   content: string;
   timestamp: Date;
-  author: string;
-  sentiment: string;
-  retweets: number;
-  comments: number;
-  likes: number;
-  hashtags: string;
+  author: number;
   url: string;
+  sentiment: "positive" | "negative" | "neutral" | null;
+  retweets: number;
+  replies: number;
+  likes: number;
+  quotes: number;
+  pub_score: number;
+  hashtags: string[];
 };
 
 export type News = {
   headline: string;
-  content: string;
   url: string;
-  sentiment: string;
-  summary: string;
+  timestamp: Date;
+  sentiment: "positive" | "negative" | "neutral" | null;
+  source: string;
 };
 
 export type Price = {
@@ -55,7 +59,7 @@ export type Reddit = {
   content: string;
   timestamp: Date;
   author: string;
-  sentiment: string;
+  sentiment: "positive" | "negative" | "neutral" | null;
   score: number;
   num_comments: number;
   url: string;

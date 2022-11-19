@@ -189,7 +189,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
 //       </div>
 //     </>
 //   );
-// };
+// }
 
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
