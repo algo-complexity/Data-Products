@@ -3,6 +3,7 @@ from django.db import models
 
 from models import FuzzySearchable
 
+
 class Stock(models.Model):
     class Meta:
         indexes = [
@@ -22,7 +23,7 @@ class Stock(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name}: {self.ticker}"
-    
+
 
 class Price(models.Model):
     open = models.DecimalField(max_digits=20, decimal_places=5)
@@ -35,6 +36,7 @@ class Price(models.Model):
     def __str__(self) -> str:
         return f"{self.stock.name} @ {self.timestamp.strftime('%Y-%m-%d')}: Open {self.open}, High {self.high}, Low {self.low}, Close {self.close}"
 
+
 class News(models.Model):
 
     headline = models.TextField()
@@ -43,6 +45,7 @@ class News(models.Model):
     sentiment = models.TextField(null=True)
     summary = models.TextField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+
 
 class Tweet(models.Model):
 
@@ -56,6 +59,7 @@ class Tweet(models.Model):
     hashtags = models.TextField()
     url = models.URLField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+
 
 class Reddit(models.Model):
 
@@ -72,6 +76,7 @@ class Reddit(models.Model):
 
     def __str__(self) -> str:
         return f"{self.title}"
+
 
 class Indicator(models.Model):
     class Meta:

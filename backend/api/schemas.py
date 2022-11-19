@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from api import models
 
+
 class Stock(BaseModel):
     name: str
     ticker: str
@@ -17,8 +18,9 @@ class Stock(BaseModel):
             name=stock.name,
             ticker=stock.ticker,
             summary=stock.summary,
-            image_url=stock.image_url
+            image_url=stock.image_url,
         )
+
 
 class StockStub(BaseModel):
     name: str
@@ -73,6 +75,7 @@ class Reddit(BaseModel):
             url=reddit.url,
         )
 
+
 class Indicator(BaseModel):
     name: str
     value: float
@@ -83,4 +86,3 @@ class Indicator(BaseModel):
             name=indicator.name,
             value=indicator.value,
         )
-
