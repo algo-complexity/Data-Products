@@ -323,7 +323,7 @@ def get_news(search_term, data_filter=None) -> pd.DataFrame:
     )
     # adjust the date column
     df.date = df.date.astype("datetime64")
-    df.sentiment = df.title.apply(lambda x: get_sentiment(x))
+    df.sentiment = df.title.apply(get_sentiment)
     return df
 
 
