@@ -37,27 +37,34 @@ class Price(models.Model):
         return f"{self.stock.name} @ {self.timestamp.strftime('%Y-%m-%d')}: Open {self.open}, High {self.high}, Low {self.low}, Close {self.close}"
 
 
-class News(models.Model):
+class SentimentChoices(models.TextChoices):
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
 
+
+class News(models.Model):
     headline = models.TextField()
-    content = models.TextField()
-    url = models.URLField()
-    sentiment = models.TextField(null=True)
-    summary = models.TextField()
+    url = models.URLField(unique=True)
+    timestamp = models.DateTimeField()
+    sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
+    source = models.TextField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
 
 class Tweet(models.Model):
-
+    api_id = models.PositiveBigIntegerField(unique=True)
     content = models.TextField()
     timestamp = models.DateTimeField()
     author = models.TextField()
-    sentiment = models.TextField(null=True)
-    retweets = models.PositiveIntegerField()
-    comments = models.PositiveIntegerField()
-    likes = models.PositiveIntegerField()
-    hashtags = models.TextField()
     url = models.URLField()
+    sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
+    retweets = models.PositiveIntegerField()
+    replies = models.PositiveIntegerField()
+    likes = models.PositiveIntegerField()
+    quotes = models.PositiveIntegerField()
+    pub_score = models.PositiveIntegerField()
+    hashtags = models.TextField()
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
 
@@ -68,7 +75,7 @@ class Reddit(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField()
     author = models.TextField()
-    sentiment = models.TextField(null=True)
+    sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     score = models.IntegerField()
     num_comments = models.IntegerField()
     url = models.URLField()

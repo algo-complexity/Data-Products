@@ -39,6 +39,9 @@ class Config(BaseSettings):
     reddit_user_agent: str
 
     google_api_key: str
+    twitter_api_key: str
+    twitter_api_secret: str
+    twitter_bearer_token: str
 
 
 # Lazily initialize the config variable using module-level __getattr__
