@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { HomeOutlined } from "@ant-design/icons";
 import {
   Layout,
@@ -39,6 +39,7 @@ import {
   Legend,
   TimeSeriesScale,
   FinancialDataPoint,
+  TooltipItem,
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -70,7 +71,28 @@ const Indicators = ({ stock }: { stock: Stock }) => {
     datasets: [
       {
         label: stock.name,
-        data: [],
+        data: [
+          {
+            x: "sma",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "ema",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "rsi",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "macd",
+            y: "indicator",
+            v: "positive",
+          },
+        ],
         backgroundColor: "#000000",
         borderColor: "#000000",
         width: 5,
@@ -79,6 +101,7 @@ const Indicators = ({ stock }: { stock: Stock }) => {
       },
     ],
   });
+  const chartRef = useRef<ChartJS<"matrix", CategoricalMatrixDataPoint[]>>();
 
   useEffect(() => {
     if (indicators) {
@@ -86,12 +109,17 @@ const Indicators = ({ stock }: { stock: Stock }) => {
         datasets: [
           {
             label: stock.name,
-            backgroundColor: "#D0FF00",
-            borderColor: "#D0FF00",
+            backgroundColor: (context) =>
+              (context.raw as CategoricalMatrixDataPoint).v === "positive"
+                ? "rgba(0, 255, 0, 0.5)"
+                : (context.raw as CategoricalMatrixDataPoint).v === "negative"
+                ? "rgba(255, 0, 0, 0.5)"
+                : "rgba(255, 255, 0, 0.5)",
+            borderColor: "#000000",
             width: ({ chart, dataset }) =>
               chart.chartArea.width / dataset.data.length,
             height: ({ chart }) => chart.chartArea.height,
-            borderWidth: 5,
+            borderWidth: 1,
             data: indicators.map((indicator) => {
               return {
                 x: indicator.name,
@@ -112,20 +140,18 @@ const Indicators = ({ stock }: { stock: Stock }) => {
         display: true,
         text: stock.name,
       },
+      tooltip: {
+        callbacks: {
+          label: (context: TooltipItem<"matrix">) => {
+            const v = context.raw as CategoricalMatrixDataPoint;
+            return ["x: " + v.x, "y: " + v.y, "v: " + v.v];
+          },
+        },
+      },
       scales: {
         x: {
           type: "category",
-          labels: [
-            "sma_50",
-            "sma_100",
-            "sma_200",
-            "ema_50",
-            "ema_100",
-            "ema_200",
-            "macd",
-            "rsi",
-            "atr",
-          ],
+          labels: ["sma", "ema", "macd", "rsi"],
           ticks: {
             display: true,
           },
@@ -151,6 +177,7 @@ const Indicators = ({ stock }: { stock: Stock }) => {
     <Matrix
       id="indicatorsChart"
       options={options}
+      ref={chartRef}
       data={data}
       width={600}
       height={400}
@@ -340,8 +367,8 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
           >
             <List
               dataSource={reddit}
-              renderItem={(item) => (
-                <List.Item key={item.author}>
+              renderItem={(item, i) => (
+                <List.Item key={i}>
                   <List.Item.Meta
                     title={
                       <a target="_blank" rel="noreferrer" href={item.url}>

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -72,7 +72,7 @@ class Reddit(BaseModel):
 
 class Indicator(BaseModel):
     name: str
-    value: float
+    value: Literal["positive", "negative", "neutral"]
 
     @classmethod
     def from_orm(cls, indicator: models.Indicator):

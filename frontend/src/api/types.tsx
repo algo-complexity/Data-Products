@@ -40,17 +40,8 @@ export type Price = {
 };
 
 export type Indicator = {
-  name:
-    | "sma_50"
-    | "sma_100"
-    | "sma_200"
-    | "ema_50"
-    | "ema_100"
-    | "ema_200"
-    | "macd"
-    | "rsi"
-    | "atr";
-  value: number;
+  name: "sma" | "ema" | "macd" | "rsi";
+  value: "positive" | "negative" | "neutral";
 };
 
 export type CandlestickData<T> = {
@@ -66,7 +57,7 @@ export type CandlestickData<T> = {
 export type CategoricalMatrixDataPoint = {
   x: string;
   y: string;
-  v: number;
+  v: string;
 };
 
 export type MatrixData<T> = {
