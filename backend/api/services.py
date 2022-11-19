@@ -1,29 +1,30 @@
-from . import models
-from typing import Optional
-import pandas as pd
 import re
-
-from ta.trend import SMAIndicator, EMAIndicator, MACD
-from ta.momentum import RSIIndicator
-from ta.volatility import AverageTrueRange
-import numpy as np
-import praw
-import tweepy
-import requests
 import xml.etree.ElementTree as ET  # built in library
-from datetime import datetime
+from typing import Optional
 
+import numpy as np
+import pandas as pd
+import praw
+import requests
+import tweepy
+from django.db.models import QuerySet
+from django.utils.timezone import datetime, utc
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from requests import get
+from ta.momentum import RSIIndicator
+from ta.trend import MACD, EMAIndicator, SMAIndicator
+from ta.volatility import AverageTrueRange
+
 from dataprod.config import Config, config
 
-from django.utils.timezone import datetime, utc
-from django.db.models import QuerySet
+from . import models
 
 config: Config
 
 reddit = praw.Reddit(
-    client_id=config.reddit_client_id, client_secret=config.reddit_client_secret, user_agent=config.reddit_user_agent
+    client_id=config.reddit_client_id,
+    client_secret=config.reddit_client_secret,
+    user_agent=config.reddit_user_agent,
 )
 
 twitter = tweepy.Client(bearer_token=config.twitter_bearer_token)
@@ -37,7 +38,9 @@ headers = {
 
 
 def calculate_indices(stock: models.Stock):
-    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    prices = (
+        stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    )
     prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
 
     # Initialise all the indicators
@@ -49,68 +52,42 @@ def calculate_indices(stock: models.Stock):
     ema_200 = EMAIndicator(close=prices_df["close"], window=200)
     macd = MACD(close=prices_df["close"])
     rsi = RSIIndicator(close=prices_df["close"])
-    atr = AverageTrueRange(high=prices_df["high"], low=prices_df["low"], close=prices_df["close"])
+    atr = AverageTrueRange(
+        high=prices_df["high"], low=prices_df["low"], close=prices_df["close"]
+    )
 
     models.Indicator.objects.update_or_create(
         stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1])
     )
     models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_100", defaults=dict(value=sma_100.sma_indicator().iloc[-1])
+        stock=stock,
+        name="sma_100",
+        defaults=dict(value=sma_100.sma_indicator().iloc[-1]),
     )
     models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_200", defaults=dict(value=sma_200.sma_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_100", defaults=dict(value=ema_100.ema_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_200", defaults=dict(value=ema_200.ema_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1]))
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1])
-    )
-
-
-def calculate_indices(stock: models.Stock):
-    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
-    prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
-
-    # Initialise all the indicators
-    sma_50 = SMAIndicator(close=prices_df["close"], window=50)
-    sma_100 = SMAIndicator(close=prices_df["close"], window=100)
-    sma_200 = SMAIndicator(close=prices_df["close"], window=200)
-    ema_50 = EMAIndicator(close=prices_df["close"], window=50)
-    ema_100 = EMAIndicator(close=prices_df["close"], window=100)
-    ema_200 = EMAIndicator(close=prices_df["close"], window=200)
-    macd = MACD(close=prices_df["close"])
-    rsi = RSIIndicator(close=prices_df["close"])
-    atr = AverageTrueRange(high=prices_df["high"], low=prices_df["low"], close=prices_df["close"])
-
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_100", defaults=dict(value=sma_100.sma_indicator().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_200", defaults=dict(value=sma_200.sma_indicator().iloc[-1])
+        stock=stock,
+        name="sma_200",
+        defaults=dict(value=sma_200.sma_indicator().iloc[-1]),
     )
     models.Indicator.objects.update_or_create(
         stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1])
     )
     models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_100", defaults=dict(value=ema_100.ema_indicator().iloc[-1])
+        stock=stock,
+        name="ema_100",
+        defaults=dict(value=ema_100.ema_indicator().iloc[-1]),
     )
     models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_200", defaults=dict(value=ema_200.ema_indicator().iloc[-1])
+        stock=stock,
+        name="ema_200",
+        defaults=dict(value=ema_200.ema_indicator().iloc[-1]),
     )
-    models.Indicator.objects.update_or_create(stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1]))
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1])
+    )
     models.Indicator.objects.update_or_create(
         stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1])
     )
@@ -125,7 +102,9 @@ def get_yahoo_autocomplete_stock_ticker(search: str) -> Optional[str]:
 
 
 def get_yahoo_stock_data(ticker: str) -> dict:
-    response = get(f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker})
+    response = get(
+        f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker}
+    )
     json = response.json()
     data = {
         "name": json["quoteType"]["shortName"],
@@ -151,7 +130,9 @@ def get_yahoo_stock_price(ticker: str) -> pd.DataFrame:
         "includeAdjustedClose": "true",
     }
 
-    response = get(f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring).json()
+    response = get(
+        f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring
+    ).json()
     if response["chart"]["error"]:
         return
 
@@ -177,14 +158,17 @@ def get_stock_from_yahoo(search: str) -> QuerySet:
         if not stock.exists():
             data = get_yahoo_stock_data(ticker)
             stock, _ = models.Stock.objects.update_or_create(
-                ticker=data["ticker"], defaults=dict(name=data["name"], summary=data["summary"])
+                ticker=data["ticker"],
+                defaults=dict(name=data["name"], summary=data["summary"]),
             )
 
             if stock:
                 stock_data = get_yahoo_stock_price(ticker)
                 for _, _open, high, low, close, timestamp in stock_data.itertuples():
                     models.Price.objects.update_or_create(
-                        timestamp=timestamp, stock=stock, defaults=dict(open=_open, high=high, low=low, close=close)
+                        timestamp=timestamp,
+                        stock=stock,
+                        defaults=dict(open=_open, high=high, low=low, close=close),
                     )
                 calculate_indices(stock)
             stock = models.Stock.objects.filter(ticker=ticker)
@@ -249,9 +233,11 @@ def get_tweets(query) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame of tweets and other relevant information.
     """
-    query = "\$" + query + " lang:en"
+    query = f"\\${query} lang:en"
     tweets = twitter.search_recent_tweets(
-        query=query, tweet_fields=["author_id", "created_at", "public_metrics", "entities"], max_results=100
+        query=query,
+        tweet_fields=["author_id", "created_at", "public_metrics", "entities"],
+        max_results=100,
     )
 
     tweets_df = pd.DataFrame(tweets.data)
@@ -271,12 +257,18 @@ def get_tweets(query) -> pd.DataFrame:
     hashtags = pd.Series(hashtags).rename("hashtags")
 
     tweets_df = pd.concat([tweets_df, hashtags, pub_metrics], axis=1)
-    tweets_df.drop(columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True)
+    tweets_df.drop(
+        columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True
+    )
     tweets_df["text"] = tweets_df["text"].apply(cleanTxt)
-    tweets_df["url"] = tweets_df["id"].apply(lambda x: "https://twitter.com/twitter/status/" + str(x))
+    tweets_df["url"] = tweets_df["id"].apply(
+        lambda x: "https://twitter.com/twitter/status/" + str(x)
+    )
 
     # publicity score by summing pub metrics
-    tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
+    tweets_df["pub_score"] = tweets_df[
+        ["retweet_count", "reply_count", "like_count", "quote_count"]
+    ].sum(axis=1)
     tweets_df["sentiment"] = tweets_df["text"].apply(get_sentiment)
 
     # sort by publicity
@@ -319,7 +311,13 @@ def get_news(search_term, data_filter=None) -> pd.DataFrame:
 
     # set the data frame
     df = pd.DataFrame(
-        {"title": title, "link": link, "description": short_description, "date": pubDate, "source": source}
+        {
+            "title": title,
+            "link": link,
+            "description": short_description,
+            "date": pubDate,
+            "source": source,
+        }
     )
     # adjust the date column
     df.date = df.date.astype("datetime64")
@@ -354,7 +352,11 @@ def clean_url(searched_item, data_filter):
         time = "after%3A" + temp_time + "+before%3A" + today
     else:
         time = ""
-    url = f"https://news.google.com/rss/search?q={searched_item}+" + time + "&hl=en-US&ceid=US%3Aen"
+    url = (
+        f"https://news.google.com/rss/search?q={searched_item}+"
+        + time
+        + "&hl=en-US&ceid=US%3Aen"
+    )
     return url
 
 
@@ -383,8 +385,8 @@ def get_sentiment(text):
 
 
 def cleanTxt(text):
-    text = re.sub("@[A-Za-z0–9]+", "", text)  # Removing @mentions
-    text = re.sub("#", "", text)  # Removing '#' hash tag
-    text = re.sub("RT[\s]+", "", text)  # Removing RT
-    text = re.sub("https?:\/\/\S+", "", text)  # Removing hyperlink
+    text = re.sub(r"@[A-Za-z0–9]+", "", text)  # Removing @mentions
+    text = re.sub(r"#", "", text)  # Removing '#' hash tag
+    text = re.sub(r"RT[\s]+", "", text)  # Removing RT
+    text = re.sub(r"https?:\/\/\S+", "", text)  # Removing hyperlink
     return text

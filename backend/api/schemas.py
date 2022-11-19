@@ -1,5 +1,5 @@
-from datetime import date, datetime
-from typing import Dict, Literal, Optional, Union
+from datetime import datetime
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -14,7 +14,12 @@ class Stock(BaseModel):
 
     @classmethod
     def from_orm(cls, stock: models.Stock):
-        return cls(name=stock.name, ticker=stock.ticker, summary=stock.summary, image_url=stock.image_url)
+        return cls(
+            name=stock.name,
+            ticker=stock.ticker,
+            summary=stock.summary,
+            image_url=stock.image_url,
+        )
 
 
 class StockStub(BaseModel):

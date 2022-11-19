@@ -1,7 +1,8 @@
-from . import models, services
+import pandas as pd
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import pandas as pd
+
+from . import models, services
 
 
 @receiver(post_save, sender=models.Stock)

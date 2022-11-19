@@ -20,7 +20,9 @@ class Config(BaseSettings):
                 file_secret_settings,
             )
 
-    secret_key: str = "django-insecure-5-wh%*_hny_@&#b+7+snq*)tik)a-+q@#()^qlpgeco2f8q&*8"
+    secret_key: str = (
+        "django-insecure-5-wh%*_hny_@&#b+7+snq*)tik)a-+q@#()^qlpgeco2f8q&*8"
+    )
     debug: bool = True
     allowed_hosts: list = []
 
