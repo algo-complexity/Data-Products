@@ -55,10 +55,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  CandlestickElement
+  CandlestickElement,
 );
 
-const { Paragraph, Text } = Typography;
+const { Paragraph } = Typography;
 const { Content, Footer, Sider } = Layout;
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
@@ -144,7 +144,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
 const Tweets = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Tweet>
+    previousPageData: PaginatedList<Tweet>,
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
@@ -153,7 +153,7 @@ const Tweets = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
     getKey,
     fetcher,
-    { initialSize: 1 }
+    { initialSize: 1 },
   );
 
   const [tweets, setTweets] = useState<Tweet[]>([]);
@@ -266,7 +266,7 @@ const Tweets = ({ stock }: { stock: Stock }) => {
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Reddit>
+    previousPageData: PaginatedList<Reddit>,
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/reddit?page=${pageIndex + 1}`;
@@ -275,7 +275,7 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
     getKey,
     fetcher,
-    { initialSize: 1 }
+    { initialSize: 1 },
   );
 
   const [reddit, setReddit] = useState<Reddit[]>([]);
@@ -391,7 +391,7 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
     getKey,
     fetcher,
-    { initialSize: 1 }
+    { initialSize: 1 },
   );
 
   const [news, setNews] = useState<News[]>([]);
@@ -489,7 +489,6 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
 };
 
 const Profile = ({ stock }: { stock: Stock }) => {
-  const content = <div>{stock.summary}</div>;
   const [ellipsis, setEllipsis] = useState(false);
   const [key, setKey] = useState(0);
 
@@ -520,7 +519,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
         >
           {stock.summary}
         </Paragraph>
-        {ellipsis && <a onClick={typoLess}>less</a>}
+        {ellipsis && <Button onClick={typoLess}>less</Button>}
       </Card>
     </div>
   );
@@ -548,7 +547,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
 const Home: React.FC = () => {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    []
+    [],
   );
   const [ticker, setTicker] = useState("");
   const debounced = useDebouncedCallback((searchText) => {
@@ -559,7 +558,7 @@ const Home: React.FC = () => {
             value: stock.ticker,
             label: `${stock.name} (${stock.ticker})`,
           };
-        })
+        }),
       );
     });
   }, 1500);
