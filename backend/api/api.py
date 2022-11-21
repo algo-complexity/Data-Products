@@ -32,9 +32,7 @@ def get_stock(request, ticker: str):
 
 @router.get("/stock/{str:ticker}/price", response=list[schemas.Price])
 def get_stock_price(request, ticker: str):
-    results = models.Price.objects.filter(stock__ticker=ticker).order_by("-timestamp")[
-        :252
-    ]
+    results = models.Price.objects.filter(stock__ticker=ticker).order_by("-timestamp")[:252]
     return [schemas.Price.from_orm(price) for price in results]
 
 
@@ -42,6 +40,18 @@ def get_stock_price(request, ticker: str):
 def get_stock_reddit(request, ticker: str, page: int = 1, limit: int = 10):
     results = models.Reddit.objects.filter(stock__ticker=ticker)
     return paginate(results, schemas.Reddit, page, limit)
+
+
+@router.get("/stock/{str:ticker}/tweets", response=PaginatedList[schemas.Tweet])
+def get_stock_tweets(request, ticker: str, page: int = 1, limit: int = 10):
+    results = models.Tweet.objects.filter(stock__ticker=ticker)
+    return paginate(results, schemas.Tweet, page, limit)
+
+
+@router.get("/stock/{str:ticker}/news", response=PaginatedList[schemas.News])
+def get_stock_news(request, ticker: str, page: int = 1, limit: int = 10):
+    results = models.News.objects.filter(stock__ticker=ticker)
+    return paginate(results, schemas.News, page, limit)
 
 
 @router.get("/stock/{str:ticker}/indicators", response=list[schemas.Indicator])

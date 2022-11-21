@@ -92,15 +92,15 @@ class Tweet(BaseModel):
     @classmethod
     def from_orm(cls, tweet: models.Tweet):
         return cls(
-            content=tweet.text,
-            timestamp=tweet.created_at,
-            author=tweet.author_id,
+            content=tweet.content,
+            timestamp=tweet.timestamp,
+            author=tweet.author,
             url=tweet.url,
             sentiment=tweet.sentiment,
-            retweets=tweet.retweet_count,
-            replies=tweet.reply_count,
-            likes=tweet.like_count,
-            quotes=tweet.quote_count,
+            retweets=tweet.retweets,
+            replies=tweet.replies,
+            likes=tweet.likes,
+            quotes=tweet.quotes,
             pub_score=tweet.pub_score,
             hashtags=tweet.hashtags.split(),
         )
@@ -116,9 +116,9 @@ class News(BaseModel):
     @classmethod
     def from_orm(cls, news: models.News):
         return cls(
-            headline=news.title,
-            url=news.link,
-            timestamp=news.date,
+            headline=news.headline,
+            url=news.url,
+            timestamp=news.timestamp,
             sentiment=news.sentiment,
             source=news.source,
         )
