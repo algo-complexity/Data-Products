@@ -44,6 +44,18 @@ def get_stock_reddit(request, ticker: str, page: int = 1, limit: int = 10):
     return paginate(results, schemas.Reddit, page, limit)
 
 
+@router.get("/stock/{str:ticker}/tweets", response=PaginatedList[schemas.Tweet])
+def get_stock_tweets(request, ticker: str, page: int = 1, limit: int = 10):
+    results = models.Tweet.objects.filter(stock__ticker=ticker)
+    return paginate(results, schemas.Tweet, page, limit)
+
+
+@router.get("/stock/{str:ticker}/news", response=PaginatedList[schemas.News])
+def get_stock_news(request, ticker: str, page: int = 1, limit: int = 10):
+    results = models.News.objects.filter(stock__ticker=ticker)
+    return paginate(results, schemas.News, page, limit)
+
+
 @router.get("/stock/{str:ticker}/indicators", response=list[schemas.Indicator])
 def get_stock_indicators(request, ticker: str):
     results = models.Indicator.objects.filter(stock__ticker=ticker)
