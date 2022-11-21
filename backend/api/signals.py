@@ -29,15 +29,6 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                 ),
             )
 
-        models.Stock.objects.update_or_create(
-            ticker=instance.ticker,
-            defaults=dict(
-                name=instance.name,
-                summary=instance.summary,
-                image_url=services.get_image_url(instance.name),
-            ),
-        )
-
         # Add Twitter
         df = services.get_tweets(instance.ticker)
         for args in df.itertuples(index=False):

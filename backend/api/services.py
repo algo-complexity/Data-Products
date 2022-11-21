@@ -162,6 +162,7 @@ def get_stock_from_yahoo(search: str) -> QuerySet:
             stock, _ = models.Stock.objects.update_or_create(
                 ticker=data["ticker"],
                 defaults=dict(name=data["name"], summary=data["summary"]),
+                image_url=get_image_url(data["name"]),
             )
 
             if stock:
