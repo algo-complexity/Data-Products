@@ -55,11 +55,18 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  CandlestickElement,
+  CandlestickElement
 );
 
 const { Paragraph, Text } = Typography;
 const { Content, Footer, Sider } = Layout;
+
+const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
+  <Space>
+    {React.createElement(icon)}
+    {text}
+  </Space>
+);
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
@@ -137,7 +144,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
 const Tweets = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Tweet>,
+    previousPageData: PaginatedList<Tweet>
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
@@ -146,7 +153,7 @@ const Tweets = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
     getKey,
     fetcher,
-    { initialSize: 1 },
+    { initialSize: 1 }
   );
 
   const [tweets, setTweets] = useState<Tweet[]>([]);
@@ -180,15 +187,55 @@ const Tweets = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText icon={LikeOutlined} text="placeholder" />
+                  <IconText icon={LineOutlined} text="placeholder" />
+                  <IconText icon={DislikeOutlined} text="placeholder" />
+                </Space>
+              </>
+            }
             <List
               dataSource={tweets}
               renderItem={(item) => (
-                <List.Item key={item.author}>
+                <List.Item
+                  key={item.author}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="2" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="3" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
-                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
-                    description={item.content}
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.author}
+                      </a>
+                    }
+                    description={
+                      <Space size={40}>
+                        <div>Retweets: {item.retweets}</div>
+                        <div>Likes: {item.likes}</div>
+                        <div>Quotes: {item.quotes}</div>
+                        <div>Replies: {item.replies}</div>
+                        <div>Publicity Score: {item.pub_score}</div>
+                        <div>Hashtags: {item.hashtags}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
                   />
-                  <div>hashtags: {item.hashtags}</div>
+                  {item.content}
                 </List.Item>
               )}
             />
@@ -199,12 +246,12 @@ const Tweets = ({ stock }: { stock: Stock }) => {
       </div>
     </>
   );
-}
+};
 
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
     pageIndex: number,
-    previousPageData: PaginatedList<Reddit>,
+    previousPageData: PaginatedList<Reddit>
   ) => {
     if (previousPageData && !previousPageData.items.length) return null;
     return `/api/stock/${stock.ticker}/reddit?page=${pageIndex + 1}`;
@@ -213,18 +260,11 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<Reddit>>(
     getKey,
     fetcher,
-    { initialSize: 1 },
+    { initialSize: 1 }
   );
 
   const [reddit, setReddit] = useState<Reddit[]>([]);
   const [maxData, setMaxData] = useState(0);
-
-  const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-    <Space>
-      {React.createElement(icon)}
-      {text}
-    </Space>
-  );
 
   useEffect(() => {
     if (data) {
@@ -258,9 +298,9 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
               <>
                 <h1>Overall sentiment:</h1>
                 <Space size={35}>
-                  <IconText icon={LikeOutlined} text="10" />
-                  <IconText icon={LineOutlined} text="20" />
-                  <IconText icon={DislikeOutlined} text="30" />
+                  <IconText icon={LikeOutlined} text="placeholder" />
+                  <IconText icon={LineOutlined} text="placeholder" />
+                  <IconText icon={DislikeOutlined} text="placeholder" />
                 </Space>
               </>
             }
@@ -271,13 +311,18 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
                 <List.Item
                   key={item.author}
                   actions={[
-                    item.sentiment && <IconText icon={LikeOutlined} text="1" />,
-                    item.sentiment && <IconText icon={LineOutlined} text="2" />,
-                    item.sentiment && (
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="2" />
+                    ),
+                    item.sentiment === "negative" && (
                       <IconText icon={DislikeOutlined} text="3" />
                     ),
                   ]}
                 >
+                  <Divider />
                   <List.Item.Meta
                     title={
                       <a target="_blank" rel="noreferrer" href={item.url}>
@@ -316,7 +361,7 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
   const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
     getKey,
     fetcher,
-    { initialSize: 1 },
+    { initialSize: 1 }
   );
 
   const [news, setNews] = useState<News[]>([]);
@@ -350,15 +395,42 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText icon={LikeOutlined} text="placeholder" />
+                  <IconText icon={LineOutlined} text="placeholder" />
+                  <IconText icon={DislikeOutlined} text="placeholder" />
+                </Space>
+              </>
+            }
             <List
               dataSource={news}
               renderItem={(item) => (
-                <List.Item key={item.headline}>
+                <List.Item
+                  key={item.headline}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="2" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="3" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
-                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
-                    description={item.headline}
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.headline}
+                      </a>
+                    }
                   />
-                  <div>sentiment: {item.sentiment}</div>
+                  {"Source: " + item.source}
                 </List.Item>
               )}
             />
@@ -431,7 +503,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
 const Home: React.FC = () => {
   const [options, setOptions] = useState<{ value: string; label: string }[]>(
-    [],
+    []
   );
   const [ticker, setTicker] = useState("");
   const debounced = useDebouncedCallback((searchText) => {
@@ -442,7 +514,7 @@ const Home: React.FC = () => {
             value: stock.ticker,
             label: `${stock.name} (${stock.ticker})`,
           };
-        }),
+        })
       );
     });
   }, 1500);
