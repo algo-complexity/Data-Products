@@ -191,9 +191,24 @@ const Tweets = ({ stock }: { stock: Stock }) => {
               <>
                 <h1>Overall sentiment:</h1>
                 <Space size={35}>
-                  <IconText icon={LikeOutlined} text="placeholder" />
-                  <IconText icon={LineOutlined} text="placeholder" />
-                  <IconText icon={DislikeOutlined} text="placeholder" />
+                  <IconText
+                    icon={LikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
                 </Space>
               </>
             }
@@ -207,10 +222,10 @@ const Tweets = ({ stock }: { stock: Stock }) => {
                       <IconText icon={LikeOutlined} text="1" />
                     ),
                     item.sentiment === "neutral" && (
-                      <IconText icon={LineOutlined} text="2" />
+                      <IconText icon={LineOutlined} text="1" />
                     ),
                     item.sentiment === "negative" && (
-                      <IconText icon={DislikeOutlined} text="3" />
+                      <IconText icon={DislikeOutlined} text="1" />
                     ),
                   ]}
                 >
@@ -235,7 +250,7 @@ const Tweets = ({ stock }: { stock: Stock }) => {
                       </Space>
                     }
                   />
-                  {item.content}
+                  {removeMarkdown(item.content)}
                 </List.Item>
               )}
             />
@@ -298,9 +313,24 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
               <>
                 <h1>Overall sentiment:</h1>
                 <Space size={35}>
-                  <IconText icon={LikeOutlined} text="placeholder" />
-                  <IconText icon={LineOutlined} text="placeholder" />
-                  <IconText icon={DislikeOutlined} text="placeholder" />
+                  <IconText
+                    icon={LikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
                 </Space>
               </>
             }
@@ -315,10 +345,10 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
                       <IconText icon={LikeOutlined} text="1" />
                     ),
                     item.sentiment === "neutral" && (
-                      <IconText icon={LineOutlined} text="2" />
+                      <IconText icon={LineOutlined} text="1" />
                     ),
                     item.sentiment === "negative" && (
-                      <IconText icon={DislikeOutlined} text="3" />
+                      <IconText icon={DislikeOutlined} text="1" />
                     ),
                   ]}
                 >
@@ -399,9 +429,24 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
               <>
                 <h1>Overall sentiment:</h1>
                 <Space size={35}>
-                  <IconText icon={LikeOutlined} text="placeholder" />
-                  <IconText icon={LineOutlined} text="placeholder" />
-                  <IconText icon={DislikeOutlined} text="placeholder" />
+                  <IconText
+                    icon={LikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
                 </Space>
               </>
             }
@@ -415,10 +460,10 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
                       <IconText icon={LikeOutlined} text="1" />
                     ),
                     item.sentiment === "neutral" && (
-                      <IconText icon={LineOutlined} text="2" />
+                      <IconText icon={LineOutlined} text="1" />
                     ),
                     item.sentiment === "negative" && (
-                      <IconText icon={DislikeOutlined} text="3" />
+                      <IconText icon={DislikeOutlined} text="1" />
                     ),
                   ]}
                 >
