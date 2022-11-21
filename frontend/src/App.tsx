@@ -134,72 +134,72 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
   );
 };
 
-// const Tweets = ({ stock }: { stock: Stock }) => {
-//   const getKey = (
-//     pageIndex: number,
-//     previousPageData: PaginatedList<Tweet>,
-//   ) => {
-//     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
-//   };
+const Tweets = ({ stock }: { stock: Stock }) => {
+  const getKey = (
+    pageIndex: number,
+    previousPageData: PaginatedList<Tweet>,
+  ) => {
+    if (previousPageData && !previousPageData.items.length) return null;
+    return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
+  };
 
-//   const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
-//     getKey,
-//     fetcher,
-//     { initialSize: 1 },
-//   );
+  const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
+    getKey,
+    fetcher,
+    { initialSize: 1 },
+  );
 
-//   const [tweets, setTweets] = useState<Tweet[]>([]);
-//   const [maxData, setMaxData] = useState(0);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [maxData, setMaxData] = useState(0);
 
-//   useEffect(() => {
-//     if (data) {
-//       setTweets(data.map((paged) => paged.items).flat());
-//       setMaxData(data[0].total);
-//     }
-//   }, [data]);
+  useEffect(() => {
+    if (data) {
+      setTweets(data.map((paged) => paged.items).flat());
+      setMaxData(data[0].total);
+    }
+  }, [data]);
 
-//   return (
-//     <>
-//       <h3>Tweets</h3>
-//       <div
-//         id="scrollableDiv"
-//         style={{
-//           height: 400,
-//           overflow: "auto",
-//           padding: "0 16px",
-//           border: "1px solid rgba(140, 140, 140, 0.35)",
-//         }}
-//       >
-//         {data && tweets ? (
-//           <InfiniteScroll
-//             dataLength={tweets.length}
-//             next={() => setSize(size + 1)}
-//             hasMore={tweets.length < maxData}
-//             loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-//             endMessage={<Divider plain>End</Divider>}
-//             scrollableTarget="scrollableDiv"
-//           >
-//             <List
-//               dataSource={tweets}
-//               renderItem={(item) => (
-//                 <List.Item key={item.author}>
-//                   <List.Item.Meta
-//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
-//                     description={item.content}
-//                   />
-//                   <div>hashtags: {item.hashtags}</div>
-//                 </List.Item>
-//               )}
-//             />
-//           </InfiniteScroll>
-//         ) : (
-//           ""
-//         )}
-//       </div>
-//     </>
-//   );
-// }
+  return (
+    <>
+      <h3>Tweets</h3>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
+        }}
+      >
+        {data && tweets ? (
+          <InfiniteScroll
+            dataLength={tweets.length}
+            next={() => setSize(size + 1)}
+            hasMore={tweets.length < maxData}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            endMessage={<Divider plain>End</Divider>}
+            scrollableTarget="scrollableDiv"
+          >
+            <List
+              dataSource={tweets}
+              renderItem={(item) => (
+                <List.Item key={item.author}>
+                  <List.Item.Meta
+                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
+                    description={item.content}
+                  />
+                  <div>hashtags: {item.hashtags}</div>
+                </List.Item>
+              )}
+            />
+          </InfiniteScroll>
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
+}
 
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
@@ -307,69 +307,69 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   );
 };
 
-// const NewsComponent = ({ stock }: { stock: Stock }) => {
-//   const getKey = (pageIndex: number, previousPageData: PaginatedList<News>) => {
-//     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.ticker}/news?page=${pageIndex + 1}`;
-//   };
+const NewsComponent = ({ stock }: { stock: Stock }) => {
+  const getKey = (pageIndex: number, previousPageData: PaginatedList<News>) => {
+    if (previousPageData && !previousPageData.items.length) return null;
+    return `/api/stock/${stock.ticker}/news?page=${pageIndex + 1}`;
+  };
 
-//   const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
-//     getKey,
-//     fetcher,
-//     { initialSize: 1 },
-//   );
+  const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
+    getKey,
+    fetcher,
+    { initialSize: 1 },
+  );
 
-//   const [news, setNews] = useState<News[]>([]);
-//   const [maxData, setMaxData] = useState(0);
+  const [news, setNews] = useState<News[]>([]);
+  const [maxData, setMaxData] = useState(0);
 
-//   useEffect(() => {
-//     if (data) {
-//       setNews(data.map((paged) => paged.items).flat());
-//       setMaxData(data[0].total);
-//     }
-//   }, [data]);
+  useEffect(() => {
+    if (data) {
+      setNews(data.map((paged) => paged.items).flat());
+      setMaxData(data[0].total);
+    }
+  }, [data]);
 
-//   return (
-//     <>
-//       <h3>news</h3>
-//       <div
-//         id="scrollableDiv"
-//         style={{
-//           height: 400,
-//           overflow: "auto",
-//           padding: "0 16px",
-//           border: "1px solid rgba(140, 140, 140, 0.35)",
-//         }}
-//       >
-//         {data && news ? (
-//           <InfiniteScroll
-//             dataLength={news.length}
-//             next={() => setSize(size + 1)}
-//             hasMore={news.length < maxData}
-//             loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-//             endMessage={<Divider plain>End</Divider>}
-//             scrollableTarget="scrollableDiv"
-//           >
-//             <List
-//               dataSource={news}
-//               renderItem={(item) => (
-//                 <List.Item key={item.headline}>
-//                   <List.Item.Meta
-//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
-//                     description={item.content}
-//                   />
-//                   <div>sentiment: {item.sentiment}</div>
-//                 </List.Item>
-//               )}
-//             />
-//           </InfiniteScroll>
-//         ) : (
-//           ""
-//         )}
-//       </div>
-//     </>
-//   );
-// };
+  return (
+    <>
+      <h3>News</h3>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
+        }}
+      >
+        {data && news ? (
+          <InfiniteScroll
+            dataLength={news.length}
+            next={() => setSize(size + 1)}
+            hasMore={news.length < maxData}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            endMessage={<Divider plain>End</Divider>}
+            scrollableTarget="scrollableDiv"
+          >
+            <List
+              dataSource={news}
+              renderItem={(item) => (
+                <List.Item key={item.headline}>
+                  <List.Item.Meta
+                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
+                    description={item.headline}
+                  />
+                  <div>sentiment: {item.sentiment}</div>
+                </List.Item>
+              )}
+            />
+          </InfiniteScroll>
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
+};
 
 const Profile = ({ stock }: { stock: Stock }) => {
   const content = <div>{stock.summary}</div>;
@@ -422,8 +422,8 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
         <Profile stock={stock} />
         <StockPrice stock={stock} />
       </Space>
-      {/* <Tweets stock={stock} />
-      <NewsComponent stock={stock} /> */}
+      <Tweets stock={stock} />
+      <NewsComponent stock={stock} />
       <RedditComponent stock={stock} />
     </Space>
   );

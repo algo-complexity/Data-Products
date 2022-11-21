@@ -45,7 +45,7 @@ class SentimentChoices(models.TextChoices):
 
 class News(models.Model):
     headline = models.TextField()
-    url = models.URLField(unique=True)
+    url = models.URLField(unique=True, max_length=800)
     timestamp = models.DateTimeField()
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     source = models.TextField()
@@ -57,7 +57,7 @@ class Tweet(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField()
     author = models.TextField()
-    url = models.URLField()
+    url = models.URLField(max_length=400)
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     retweets = models.PositiveIntegerField()
     replies = models.PositiveIntegerField()
@@ -69,7 +69,6 @@ class Tweet(models.Model):
 
 
 class Reddit(models.Model):
-
     api_id = models.TextField(unique=True)
     title = models.TextField()
     content = models.TextField()
@@ -78,7 +77,7 @@ class Reddit(models.Model):
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     score = models.IntegerField()
     num_comments = models.IntegerField()
-    url = models.URLField()
+    url = models.URLField(max_length=400)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
