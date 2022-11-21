@@ -97,7 +97,7 @@ def get_yahoo_autocomplete_stock_ticker(search: str) -> Optional[str]:
 
 
 def get_yahoo_stock_data(ticker: str) -> dict:
-    response = get(f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker})
+    response = requests.get(f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker})
     json = response.json()
     data = {
         "name": json["quoteType"]["shortName"],
@@ -123,7 +123,7 @@ def get_yahoo_stock_price(ticker: str) -> pd.DataFrame:
         "includeAdjustedClose": "true",
     }
 
-    response = get(f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring).json()
+    response = requests.get(f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring).json()
     if response["chart"]["error"]:
         return
 
