@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from ninja import Router
+from django.db.models import Count, Q
+from typing import Literal
 
 from schemas import PaginatedList, paginate
 
@@ -58,3 +60,19 @@ def get_stock_news(request, ticker: str, page: int = 1, limit: int = 10):
 def get_stock_indicators(request, ticker: str):
     results = models.Indicator.objects.filter(stock__ticker=ticker)
     return [schemas.Indicator.from_orm(price) for price in results]
+
+
+@router.get("/stock/{str:ticker}/sentiment", response=list[schemas.PieValue])
+def get_stock_sentiment(request, ticker: str, q: Literal["tweet", "reddit", "news"] = "tweet"):
+
+    results = (
+        models.Stock.objects.filter(ticker=ticker)
+        .annotate(
+            negative=Count(f"{q}__sentiment", filter=Q(**{f"{q}__sentiment": models.SentimentChoices.NEGATIVE})),
+            positive=Count(f"{q}__sentiment", filter=Q(**{f"{q}__sentiment": models.SentimentChoices.POSITIVE})),
+            neutral=Count(f"{q}__sentiment", filter=Q(**{f"{q}__sentiment": models.SentimentChoices.NEUTRAL})),
+        )
+        .first()
+    )
+
+    return [schemas.PieValue(key=key, value=getattr(results, key)) for key in ["positive", "negative", "neutral"]]

@@ -11,7 +11,7 @@ import {
   Menu,
 } from "antd";
 import "antd/dist/antd.css";
-import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
+import { fetcher, searchStock, useSentiment, useStock, useStockPrice } from "./api/api";
 import {
   PaginatedList,
   Stock,
@@ -19,10 +19,13 @@ import {
   News,
   Reddit,
   ChartData,
+  CandlestickData,
+  PiechartData,
 } from "./api/types";
 import {
   Chart as ChartJS,
   CategoryScale,
+  ArcElement,
   LinearScale,
   BarElement,
   Title,
@@ -30,6 +33,7 @@ import {
   Legend,
   TimeSeriesScale,
   FinancialDataPoint,
+
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -37,9 +41,11 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
+  ArcElement,
   LinearScale,
   TimeSeriesScale,
   BarElement,
@@ -53,7 +59,7 @@ const { Content, Footer, Sider } = Layout;
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
-  const [data, setData] = useState<ChartData<FinancialDataPoint>>({
+  const [data, setData] = useState<ChartData<CandlestickData<FinancialDataPoint>>>({
     datasets: [
       {
         label: stock.name,
@@ -123,6 +129,61 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
     />
   );
 };
+
+const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "tweet" | "news" | "reddit" }) => {
+  const { sentiments } = useSentiment(stock.ticker, source);
+  const [data, setData] = useState<ChartData<PiechartData<number>, string[]>>({
+    labels: [],
+    datasets: [
+      {
+        label: "",
+        data: [],
+        backgroundColor: [],
+      },
+    ],
+  });
+  useEffect(() => {
+    if (sentiments) {
+      setData({
+        labels: sentiments.map((sentiment) => sentiment.key),
+        datasets: [
+          {
+            label: `${source} Sentiment`,
+            backgroundColor: [
+              'rgb(255, 99, 132)',
+              'rgb(54, 162, 235)',
+              'rgb(255, 205, 86)'
+            ],
+            data: sentiments.map((sentiment) => sentiment.value),
+          },
+        ],
+      });
+    }
+  }, [sentiments]);
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: stock.name,
+      },
+    },
+  };
+
+  return (
+    <Pie
+      id="pieChart"
+      data={data}
+      options={options}
+      height={200}
+      width={200}
+    />
+  )
+}
 
 const Tweets = ({ stock }: { stock: Stock }) => {
   const getKey = (
@@ -330,6 +391,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
   return <Card title={stock.name} size={"small"}></Card>;
 };
 
+
 const Dashboard = ({ ticker }: { ticker: string }) => {
   var { stock } = useStock(ticker);
 
@@ -343,6 +405,13 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
         <Profile stock={stock} />
         <StockPrice stock={stock} />
       </Space>
+
+      <Space size={100}>
+        <SentimentCharts stock={stock} source='news' />
+        <SentimentCharts stock={stock} source="reddit" />
+        <SentimentCharts stock={stock} />
+      </Space>
+
       <Tweets stock={stock} />
       <NewsComponent stock={stock} />
       <RedditComponent stock={stock} />
