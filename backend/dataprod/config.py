@@ -38,6 +38,7 @@ class Config(BaseSettings):
     reddit_client_secret: str
     reddit_user_agent: str
 
+    google_api_key: str
     twitter_api_key: str
     twitter_api_secret: str
     twitter_bearer_token: str

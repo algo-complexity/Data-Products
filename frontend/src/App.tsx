@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { HomeOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  LikeOutlined,
+  DislikeOutlined,
+  LineOutlined,
+} from "@ant-design/icons";
 import {
   Layout,
   Space,
@@ -9,6 +14,9 @@ import {
   Skeleton,
   Card,
   Menu,
+  Image,
+  Typography,
+  Button,
 } from "antd";
 import "antd/dist/antd.css";
 import { fetcher, searchStock, useSentiment, useStock, useStockPrice } from "./api/api";
@@ -41,6 +49,7 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import removeMarkdown from "markdown-to-text";
 import { Pie } from "react-chartjs-2";
 
 ChartJS.register(
@@ -55,7 +64,15 @@ ChartJS.register(
   CandlestickElement,
 );
 
+const { Paragraph } = Typography;
 const { Content, Footer, Sider } = Layout;
+
+const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
+  <Space>
+    {React.createElement(icon)}
+    {text}
+  </Space>
+);
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
@@ -231,15 +248,70 @@ const Tweets = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
             <List
               dataSource={tweets}
               renderItem={(item) => (
-                <List.Item key={item.author}>
+                <List.Item
+                  key={item.author}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
-                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
-                    description={item.content}
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.author}
+                      </a>
+                    }
+                    description={
+                      <Space size={40}>
+                        <div>Retweets: {item.retweets}</div>
+                        <div>Likes: {item.likes}</div>
+                        <div>Quotes: {item.quotes}</div>
+                        <div>Replies: {item.replies}</div>
+                        <div>Publicity Score: {item.pub_score}</div>
+                        <div>Hashtags: {item.hashtags}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
                   />
-                  <div>hashtags: {item.hashtags}</div>
+                  {removeMarkdown(item.content)}
                 </List.Item>
               )}
             />
@@ -250,7 +322,7 @@ const Tweets = ({ stock }: { stock: Stock }) => {
       </div>
     </>
   );
-}
+};
 
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
@@ -298,19 +370,67 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
             <List
               dataSource={reddit}
+              itemLayout="vertical"
               renderItem={(item) => (
-                <List.Item key={item.author}>
+                <List.Item
+                  key={item.author}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
                     title={
                       <a target="_blank" rel="noreferrer" href={item.url}>
                         {item.author}
                       </a>
                     }
-                    description={item.content}
+                    description={
+                      <Space size={40}>
+                        <div>Score: {item.score}</div>
+                        <div>Commments: {item.num_comments}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
                   />
-                  <div>Score: {item.score}</div>
+                  {removeMarkdown(item.content)}
                 </List.Item>
               )}
             />
@@ -366,15 +486,57 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
             <List
               dataSource={news}
               renderItem={(item) => (
-                <List.Item key={item.headline}>
+                <List.Item
+                  key={item.headline}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
-                    title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
-                    description={item.headline}
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.headline}
+                      </a>
+                    }
                   />
-                  <div>sentiment: {item.sentiment}</div>
+                  {"Source: " + item.source}
                 </List.Item>
               )}
             />
@@ -388,7 +550,40 @@ const NewsComponent = ({ stock }: { stock: Stock }) => {
 };
 
 const Profile = ({ stock }: { stock: Stock }) => {
-  return <Card title={stock.name} size={"small"}></Card>;
+  const [ellipsis, setEllipsis] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const typoMore = () => {
+    setEllipsis(true);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
+  const typoLess = () => {
+    setEllipsis(false);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <Image src={stock.image_url ? stock.image_url : ""}></Image>
+      <Card title={stock.name}>
+        <Paragraph
+          style={{ width: "10vw" }}
+          key={key}
+          ellipsis={{
+            rows: 2,
+            expandable: true,
+            onExpand: typoMore,
+            symbol: "more",
+          }}
+        >
+          {stock.summary}
+        </Paragraph>
+        {ellipsis && <Button onClick={typoLess}>less</Button>}
+      </Card>
+    </div>
+  );
 };
 
 

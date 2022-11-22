@@ -19,7 +19,7 @@ class Stock(models.Model):
     name = models.TextField()
     ticker = models.CharField(max_length=4, unique=True)
     summary = models.TextField()
-    image_url = models.URLField(null=True)
+    image_url = models.URLField(null=True, max_length=999)
 
     def __str__(self) -> str:
         return f"{self.name}: {self.ticker}"

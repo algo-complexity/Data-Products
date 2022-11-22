@@ -10,7 +10,7 @@ import tweepy
 from django.db.models import QuerySet
 from django.utils.timezone import datetime, timedelta, utc
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from requests import get
+from serpapi import GoogleSearch
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, EMAIndicator, SMAIndicator
 from ta.volatility import AverageTrueRange
@@ -86,7 +86,9 @@ def calculate_indices(stock: models.Stock):
 
 
 def get_yahoo_autocomplete_stock_ticker(search: str) -> Optional[str]:
-    response = get(f"{base_url}/auto-complete", headers=headers, params={"q": search})
+    response = requests.get(
+        f"{base_url}/auto-complete", headers=headers, params={"q": search}
+    )
     quotes = response.json()["quotes"]
     if quotes == []:
         return None
@@ -94,7 +96,9 @@ def get_yahoo_autocomplete_stock_ticker(search: str) -> Optional[str]:
 
 
 def get_yahoo_stock_data(ticker: str) -> dict:
-    response = get(f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker})
+    response = requests.get(
+        f"{base_url}/stock/v2/get-summary", headers=headers, params={"symbol": ticker}
+    )
     json = response.json()
     data = {
         "name": json["quoteType"]["shortName"],
@@ -120,7 +124,9 @@ def get_yahoo_stock_price(ticker: str) -> pd.DataFrame:
         "includeAdjustedClose": "true",
     }
 
-    response = get(f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring).json()
+    response = requests.get(
+        f"{base_url}/stock/v3/get-chart", headers=headers, params=querystring
+    ).json()
     if response["chart"]["error"]:
         return
 
@@ -148,6 +154,7 @@ def get_stock_from_yahoo(search: str) -> QuerySet:
             stock, _ = models.Stock.objects.update_or_create(
                 ticker=data["ticker"],
                 defaults=dict(name=data["name"], summary=data["summary"]),
+                image_url=get_image_url(data["name"]),
             )
 
             if stock:
@@ -209,6 +216,18 @@ def get_reddit_posts(subreddit, symb, time="week") -> pd.DataFrame:
     df.replace("", np.nan, inplace=True)
     df.dropna(inplace=True)
     return df
+
+
+def get_image_url(query):
+    params = {"q": query, "tbm": "isch", "ijn": "0", "api_key": config.google_api_key}
+
+    search = GoogleSearch(params)
+    results = search.get_dict()
+    suggested = results["suggested_searches"]
+    image_url = [result for result in suggested if result["name"] == "logo"]
+    if image_url:
+        return image_url[0]["thumbnail"]
+    return "https://static.thenounproject.com/png/3674270-200.png"
 
 
 # TWEETS
