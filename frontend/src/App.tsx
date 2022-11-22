@@ -48,6 +48,7 @@ import {
   TimeSeriesScale,
   FinancialDataPoint,
   TooltipItem,
+  CartesianScaleTypeRegistry,
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -111,7 +112,6 @@ const Indicators = ({ stock }: { stock: Stock }) => {
       },
     ],
   });
-  const chartRef = useRef<ChartJS<"matrix", CategoricalMatrixDataPoint[]>>();
 
   useEffect(() => {
     if (indicators) {
@@ -158,27 +158,27 @@ const Indicators = ({ stock }: { stock: Stock }) => {
           },
         },
       },
-      scales: {
-        x: {
-          type: "category",
-          labels: ["sma", "ema", "macd", "rsi"],
-          ticks: {
-            display: true,
-          },
-          grid: {
-            display: false,
-          },
+    },
+    scales: {
+      x: {
+        type: "category" as keyof CartesianScaleTypeRegistry,
+        labels: ["sma", "ema", "macd", "rsi"],
+        ticks: {
+          display: true,
         },
-        y: {
-          type: "category",
-          labels: ["indicator"],
-          offset: true,
-          ticks: {
-            display: true,
-          },
-          grid: {
-            display: false,
-          },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        type: "category" as keyof CartesianScaleTypeRegistry,
+        labels: ["indicator"],
+        offset: true,
+        ticks: {
+          display: true,
+        },
+        grid: {
+          display: false,
         },
       },
     },
@@ -187,7 +187,6 @@ const Indicators = ({ stock }: { stock: Stock }) => {
     <Matrix
       id="indicatorsChart"
       options={options}
-      ref={chartRef}
       data={data}
       width={600}
       height={400}
