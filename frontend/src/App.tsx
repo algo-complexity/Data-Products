@@ -308,7 +308,7 @@ const SentimentCharts = ({
         ],
       });
     }
-  }, [sentiments]);
+  }, [sentiments, source]);
 
   const options = {
     responsive: true,
