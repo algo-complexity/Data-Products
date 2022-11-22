@@ -13,7 +13,6 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from serpapi import GoogleSearch
 from ta.momentum import RSIIndicator
 from ta.trend import MACD, EMAIndicator, SMAIndicator
-from ta.volatility import AverageTrueRange
 
 from dataprod.config import Config, config
 
@@ -44,52 +43,66 @@ def calculate_indices(stock: models.Stock):
     prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
 
     # Initialise all the indicators
-    sma_50 = SMAIndicator(close=prices_df["close"], window=50)
-    sma_100 = SMAIndicator(close=prices_df["close"], window=100)
-    sma_200 = SMAIndicator(close=prices_df["close"], window=200)
-    ema_50 = EMAIndicator(close=prices_df["close"], window=50)
-    ema_100 = EMAIndicator(close=prices_df["close"], window=100)
-    ema_200 = EMAIndicator(close=prices_df["close"], window=200)
-    macd = MACD(close=prices_df["close"])
-    rsi = RSIIndicator(close=prices_df["close"])
-    atr = AverageTrueRange(
-        high=prices_df["high"], low=prices_df["low"], close=prices_df["close"]
+    sma_50 = SMAIndicator(close=prices_df["close"], window=50).sma_indicator().iloc[-1]
+    sma_100 = (
+        SMAIndicator(close=prices_df["close"], window=100).sma_indicator().iloc[-1]
     )
+    sma_200 = (
+        SMAIndicator(close=prices_df["close"], window=200).sma_indicator().iloc[-1]
+    )
+    ema_50 = EMAIndicator(close=prices_df["close"], window=50).ema_indicator().iloc[-1]
+    ema_100 = (
+        EMAIndicator(close=prices_df["close"], window=100).ema_indicator().iloc[-1]
+    )
+    ema_200 = (
+        EMAIndicator(close=prices_df["close"], window=200).ema_indicator().iloc[-1]
+    )
+    macd = MACD(close=prices_df["close"]).macd_diff()
+    rsi = RSIIndicator(close=prices_df["close"]).rsi()
 
     models.Indicator.objects.update_or_create(
-        stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1])
+        stock=stock,
+        name="sma",
+        defaults=dict(
+            value="positive"
+            if sma_50 >= sma_100 >= sma_200
+            else "negative"
+            if sma_50 <= sma_100 <= sma_200
+            else "neutral"
+        ),
     )
     models.Indicator.objects.update_or_create(
         stock=stock,
-        name="sma_100",
-        defaults=dict(value=sma_100.sma_indicator().iloc[-1]),
+        name="ema",
+        defaults=dict(
+            value="positive"
+            if ema_50 >= ema_100 >= ema_200
+            else "negative"
+            if ema_50 <= ema_100 <= ema_200
+            else "neutral"
+        ),
     )
     models.Indicator.objects.update_or_create(
         stock=stock,
-        name="sma_200",
-        defaults=dict(value=sma_200.sma_indicator().iloc[-1]),
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="ema_50", defaults=dict(value=ema_50.ema_indicator().iloc[-1])
+        name="macd",
+        defaults=dict(
+            value="positive"
+            if macd.iloc[-2] <= 0 and macd.iloc[-1] >= 0
+            else "negative"
+            if macd.iloc[-2] >= 0 and macd.iloc[-1] <= 0
+            else "neutral"
+        ),
     )
     models.Indicator.objects.update_or_create(
         stock=stock,
-        name="ema_100",
-        defaults=dict(value=ema_100.ema_indicator().iloc[-1]),
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock,
-        name="ema_200",
-        defaults=dict(value=ema_200.ema_indicator().iloc[-1]),
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1])
-    )
-    models.Indicator.objects.update_or_create(
-        stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1])
+        name="rsi",
+        defaults=dict(
+            value="positive"
+            if rsi.iloc[-1] <= 25
+            else "negative"
+            if rsi.iloc[-1] >= 75
+            else "neutral"
+        ),
     )
 
 
@@ -332,7 +345,7 @@ def get_news(search_term, data_filter=None) -> pd.DataFrame:
         }
     )
     # adjust the date column
-    df["date"] = df["date"].astype("datetime64")
+    # df["date"] = df["date"].astype("datetime64")
     df["sentiment"] = df["title"].apply(get_sentiment)
     return df
 

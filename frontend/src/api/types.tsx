@@ -1,3 +1,5 @@
+import { ScriptableContext } from "chart.js";
+
 export type Stock = {
   name: string;
   ticker: string;
@@ -40,6 +42,11 @@ export type Price = {
   timestamp: Date;
 };
 
+export type Indicator = {
+  name: "sma" | "ema" | "macd" | "rsi";
+  value: "positive" | "negative" | "neutral";
+};
+
 export type CandlestickData<T> = {
   label: string;
   color: {
@@ -48,6 +55,22 @@ export type CandlestickData<T> = {
     unchanged: string;
   };
   data: T[];
+};
+
+export type CategoricalMatrixDataPoint = {
+  x: string;
+  y: string;
+  v: string;
+};
+
+export type MatrixData<T> = {
+  label: string;
+  data: T[];
+  backgroundColor: string | ((context: ScriptableContext<"matrix">) => string);
+  borderColor: string | ((context: ScriptableContext<"matrix">) => string);
+  width: number | ((context: ScriptableContext<"matrix">) => number);
+  height: number | ((context: ScriptableContext<"matrix">) => number);
+  borderWidth: number | ((context: ScriptableContext<"matrix">) => number);
 };
 
 export type PiechartData<T> = {

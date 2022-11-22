@@ -1,4 +1,5 @@
 import pandas as pd
+from dateutil.parser import parse
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -57,7 +58,7 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                 url=args.link,
                 defaults=dict(
                     headline=args.title,
-                    timestamp=args.date,
+                    timestamp=parse(args.date),
                     sentiment=args.sentiment,
                     source=args.source,
                     stock=instance,

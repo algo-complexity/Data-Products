@@ -24,6 +24,7 @@ import {
   searchStock,
   useSentiment,
   useStock,
+  useStockIndicator,
   useStockPrice,
 } from "./api/api";
 import {
@@ -34,6 +35,8 @@ import {
   Reddit,
   ChartData,
   CandlestickData,
+  MatrixData,
+  CategoricalMatrixDataPoint,
   PiechartData,
 } from "./api/types";
 import {
@@ -47,15 +50,18 @@ import {
   Legend,
   TimeSeriesScale,
   FinancialDataPoint,
+  TooltipItem,
+  CartesianScaleTypeRegistry,
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useSWRInfinite from "swr/infinite";
-import { Candlestick } from "./components/typedCharts";
+import { Candlestick, Matrix } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
 import removeMarkdown from "markdown-to-text";
 import { Pie } from "react-chartjs-2";
+import { MatrixElement } from "chartjs-chart-matrix";
 
 ChartJS.register(
   CategoryScale,
@@ -67,10 +73,131 @@ ChartJS.register(
   Tooltip,
   Legend,
   CandlestickElement,
+  MatrixElement,
 );
 
 const { Paragraph } = Typography;
 const { Content, Footer, Sider } = Layout;
+
+const Indicators = ({ stock }: { stock: Stock }) => {
+  const { indicators } = useStockIndicator(stock.ticker);
+  const [data, setData] = useState<
+    ChartData<MatrixData<CategoricalMatrixDataPoint>>
+  >({
+    datasets: [
+      {
+        label: stock.name,
+        data: [
+          {
+            x: "sma",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "ema",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "rsi",
+            y: "indicator",
+            v: "positive",
+          },
+          {
+            x: "macd",
+            y: "indicator",
+            v: "positive",
+          },
+        ],
+        backgroundColor: "#000000",
+        borderColor: "#000000",
+        width: 5,
+        height: 5,
+        borderWidth: 5,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (indicators) {
+      setData({
+        datasets: [
+          {
+            label: stock.name,
+            backgroundColor: (context) =>
+              (context.raw as CategoricalMatrixDataPoint).v === "positive"
+                ? "rgba(0, 255, 0, 0.5)"
+                : (context.raw as CategoricalMatrixDataPoint).v === "negative"
+                ? "rgba(255, 0, 0, 0.5)"
+                : "rgba(255, 255, 0, 0.5)",
+            borderColor: "#000000",
+            width: ({ chart, dataset }) =>
+              chart.chartArea.width / dataset.data.length,
+            height: ({ chart }) => chart.chartArea.height,
+            borderWidth: 1,
+            data: indicators.map((indicator) => {
+              return {
+                x: indicator.name,
+                y: "indicator",
+                v: indicator.value,
+              };
+            }),
+          },
+        ],
+      });
+    }
+  }, [indicators, stock.name]);
+
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: stock.name,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: TooltipItem<"matrix">) => {
+            const v = context.raw as CategoricalMatrixDataPoint;
+            return ["x: " + v.x, "y: " + v.y, "v: " + v.v];
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        type: "category" as keyof CartesianScaleTypeRegistry,
+        labels: ["sma", "ema", "macd", "rsi"],
+        ticks: {
+          display: true,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        type: "category" as keyof CartesianScaleTypeRegistry,
+        labels: ["indicator"],
+        offset: true,
+        ticks: {
+          display: true,
+        },
+        grid: {
+          display: false,
+        },
+      },
+    },
+  };
+  return (
+    <Matrix
+      id="indicatorsChart"
+      options={options}
+      data={data}
+      width={600}
+      height={400}
+    />
+  );
+};
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   <Space>
@@ -92,15 +219,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
           down: "#fe0000",
           unchanged: "#999",
         },
-        data: [
-          {
-            x: Date.now().valueOf(),
-            o: 5,
-            h: 7,
-            l: 3,
-            c: 5,
-          },
-        ],
+        data: [],
       },
     ],
   });
@@ -148,7 +267,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       id="stockChart"
       options={options}
       data={data}
-      width={1200}
+      width={600}
       height={400}
     />
   );
@@ -189,7 +308,7 @@ const SentimentCharts = ({
         ],
       });
     }
-  }, [sentiments]);
+  }, [sentiments, source]);
 
   const options = {
     responsive: true,
@@ -405,9 +524,9 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
             <List
               dataSource={reddit}
               itemLayout="vertical"
-              renderItem={(item) => (
+              renderItem={(item, i) => (
                 <List.Item
-                  key={item.author}
+                  key={i}
                   actions={[
                     item.sentiment === "positive" && (
                       <IconText icon={LikeOutlined} text="1" />
@@ -605,6 +724,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
       <Space size={100}>
         <Profile stock={stock} />
         <StockPrice stock={stock} />
+        <Indicators stock={stock} />
       </Space>
 
       <Space style={{ width: "100%", justifyContent: "space-evenly" }}>

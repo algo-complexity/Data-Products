@@ -85,6 +85,11 @@ class Reddit(models.Model):
 
 
 class Indicator(models.Model):
+    class IndicatorValueChoices(models.TextChoices):
+        POSITIVE = "positive"
+        NEGATIVE = "negative"
+        NEUTRAL = "neutral"
+
     class Meta:
         indexes = [
             GinIndex(
@@ -97,7 +102,7 @@ class Indicator(models.Model):
     objects = FuzzySearchable.as_manager()
 
     name = models.TextField()
-    value = models.DecimalField(max_digits=20, decimal_places=5)
+    value = models.TextField(choices=IndicatorValueChoices.choices)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
     def __str__(self) -> str:

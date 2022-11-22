@@ -1,5 +1,12 @@
 import axios from "axios";
-import { PaginatedList, PieValue, Price, Stock, StockStub } from "./types";
+import {
+  PaginatedList,
+  Indicator,
+  PieValue,
+  Price,
+  Stock,
+  StockStub,
+} from "./types";
 import useSWR from "swr";
 
 export const fetcher = (url: string) => axios.get(url).then((res) => res.data);
@@ -42,6 +49,18 @@ export function useStockPrice(searchText: string) {
   );
   return {
     prices: data,
+    loading: !error && !data,
+    error: error,
+  };
+}
+
+export function useStockIndicator(searchText: string) {
+  const { data, error } = useSWR<Indicator[]>(
+    `/api/stock/${searchText}/indicators`,
+    fetcher,
+  );
+  return {
+    indicators: data,
     loading: !error && !data,
     error: error,
   };

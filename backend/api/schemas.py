@@ -126,7 +126,7 @@ class News(BaseModel):
 
 class Indicator(BaseModel):
     name: str
-    value: float
+    value: Literal["positive", "negative", "neutral"]
 
     @classmethod
     def from_orm(cls, indicator: models.Indicator):
