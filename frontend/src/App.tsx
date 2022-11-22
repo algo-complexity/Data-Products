@@ -19,7 +19,13 @@ import {
   Button,
 } from "antd";
 import "antd/dist/antd.css";
-import { fetcher, searchStock, useSentiment, useStock, useStockPrice } from "./api/api";
+import {
+  fetcher,
+  searchStock,
+  useSentiment,
+  useStock,
+  useStockPrice,
+} from "./api/api";
 import {
   PaginatedList,
   Stock,
@@ -41,7 +47,6 @@ import {
   Legend,
   TimeSeriesScale,
   FinancialDataPoint,
-
 } from "chart.js";
 import { useDebouncedCallback } from "use-debounce";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -76,7 +81,9 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
-  const [data, setData] = useState<ChartData<CandlestickData<FinancialDataPoint>>>({
+  const [data, setData] = useState<
+    ChartData<CandlestickData<FinancialDataPoint>>
+  >({
     datasets: [
       {
         label: stock.name,
@@ -147,7 +154,13 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
   );
 };
 
-const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "tweet" | "news" | "reddit" }) => {
+const SentimentCharts = ({
+  stock,
+  source = "tweet",
+}: {
+  stock: Stock;
+  source?: "tweet" | "news" | "reddit";
+}) => {
   const { sentiments } = useSentiment(stock.ticker, source);
   const [data, setData] = useState<ChartData<PiechartData<number>, string[]>>({
     labels: [],
@@ -167,9 +180,9 @@ const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "
           {
             label: `${source} Sentiment`,
             backgroundColor: [
-              'rgb(102, 189, 99)',
-              'rgb(255, 255, 191)',
-              'rgb(215, 48, 39)',
+              "rgb(102, 189, 99)",
+              "rgb(255, 255, 191)",
+              "rgb(215, 48, 39)",
             ],
             data: sentiments.map((sentiment) => sentiment.value),
           },
@@ -192,15 +205,9 @@ const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "
   };
 
   return (
-    <Pie
-      id="pieChart"
-      data={data}
-      options={options}
-      height={300}
-      width={300}
-    />
-  )
-}
+    <Pie id="pieChart" data={data} options={options} height={300} width={300} />
+  );
+};
 
 const Tweets = ({ stock }: { stock: Stock }) => {
   const getKey = (
@@ -586,7 +593,6 @@ const Profile = ({ stock }: { stock: Stock }) => {
   );
 };
 
-
 const Dashboard = ({ ticker }: { ticker: string }) => {
   var { stock } = useStock(ticker);
 
@@ -602,7 +608,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
       </Space>
 
       <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
-        <SentimentCharts stock={stock} source='news' />
+        <SentimentCharts stock={stock} source="news" />
         <SentimentCharts stock={stock} source="reddit" />
         <SentimentCharts stock={stock} />
       </Space>

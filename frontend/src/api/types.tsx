@@ -83,4 +83,4 @@ export type PaginatedList<T> = {
 export type PieValue = {
   key: string;
   value: number;
-}
+};

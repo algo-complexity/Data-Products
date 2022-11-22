@@ -24,14 +24,16 @@ export function useStock(searchText: string) {
 }
 
 export function useSentiment(searchText: string, source: string = "tweet") {
-  const { data, error } = useSWR<PieValue[]>(`/api/stock/${searchText}/sentiment?q=${source}`, fetcher);
+  const { data, error } = useSWR<PieValue[]>(
+    `/api/stock/${searchText}/sentiment?q=${source}`,
+    fetcher,
+  );
   return {
     sentiments: data,
     loading: !error && !data,
     error: error,
   };
 }
-
 
 export function useStockPrice(searchText: string) {
   const { data, error } = useSWR<Price[]>(
@@ -44,4 +46,3 @@ export function useStockPrice(searchText: string) {
     error: error,
   };
 }
-

@@ -135,6 +135,7 @@ class Indicator(BaseModel):
             value=indicator.value,
         )
 
+
 class PieValue(BaseModel):
     key: str
     value: float

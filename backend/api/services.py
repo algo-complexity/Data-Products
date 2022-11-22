@@ -38,7 +38,9 @@ headers = {
 
 
 def calculate_indices(stock: models.Stock):
-    prices = stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    prices = (
+        stock.price_set.all().order_by("timestamp").values_list("high", "low", "close")
+    )
     prices_df = pd.DataFrame(prices, columns=["high", "low", "close"])
 
     # Initialise all the indicators
@@ -50,7 +52,9 @@ def calculate_indices(stock: models.Stock):
     ema_200 = EMAIndicator(close=prices_df["close"], window=200)
     macd = MACD(close=prices_df["close"])
     rsi = RSIIndicator(close=prices_df["close"])
-    atr = AverageTrueRange(high=prices_df["high"], low=prices_df["low"], close=prices_df["close"])
+    atr = AverageTrueRange(
+        high=prices_df["high"], low=prices_df["low"], close=prices_df["close"]
+    )
 
     models.Indicator.objects.update_or_create(
         stock=stock, name="sma_50", defaults=dict(value=sma_50.sma_indicator().iloc[-1])
@@ -78,8 +82,12 @@ def calculate_indices(stock: models.Stock):
         name="ema_200",
         defaults=dict(value=ema_200.ema_indicator().iloc[-1]),
     )
-    models.Indicator.objects.update_or_create(stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1]))
-    models.Indicator.objects.update_or_create(stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1]))
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="macd", defaults=dict(value=macd.macd_diff().iloc[-1])
+    )
+    models.Indicator.objects.update_or_create(
+        stock=stock, name="rsi", defaults=dict(value=rsi.rsi().iloc[-1])
+    )
     models.Indicator.objects.update_or_create(
         stock=stock, name="atr", defaults=dict(value=atr.average_true_range().iloc[-1])
     )
@@ -261,12 +269,18 @@ def get_tweets(query) -> pd.DataFrame:
     hashtags = pd.Series(hashtags).rename("hashtags")
 
     tweets_df = pd.concat([tweets_df, hashtags, pub_metrics], axis=1)
-    tweets_df.drop(columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True)
+    tweets_df.drop(
+        columns=["public_metrics", "edit_history_tweet_ids", "entities"], inplace=True
+    )
     tweets_df["text"] = tweets_df["text"].apply(cleanTxt)
-    tweets_df["url"] = tweets_df["id"].apply(lambda x: "https://twitter.com/twitter/status/" + str(x))
+    tweets_df["url"] = tweets_df["id"].apply(
+        lambda x: "https://twitter.com/twitter/status/" + str(x)
+    )
 
     # publicity score by summing pub metrics
-    tweets_df["pub_score"] = tweets_df[["retweet_count", "reply_count", "like_count", "quote_count"]].sum(axis=1)
+    tweets_df["pub_score"] = tweets_df[
+        ["retweet_count", "reply_count", "like_count", "quote_count"]
+    ].sum(axis=1)
     tweets_df["sentiment"] = tweets_df["text"].apply(get_sentiment)
 
     # sort by publicity
@@ -350,7 +364,11 @@ def clean_url(searched_item, data_filter):
         time = "after%3A" + temp_time + "+before%3A" + today
     else:
         time = ""
-    url = f"https://news.google.com/rss/search?q={searched_item}+" + time + "&hl=en-US&ceid=US%3Aen"
+    url = (
+        f"https://news.google.com/rss/search?q={searched_item}+"
+        + time
+        + "&hl=en-US&ceid=US%3Aen"
+    )
     return url
 
 
