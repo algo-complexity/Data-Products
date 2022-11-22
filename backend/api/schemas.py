@@ -134,3 +134,8 @@ class Indicator(BaseModel):
             name=indicator.name,
             value=indicator.value,
         )
+
+
+class PieValue(BaseModel):
+    key: str
+    value: float

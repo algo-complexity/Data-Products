@@ -73,8 +73,15 @@ export type MatrixData<T> = {
   borderWidth: number | ((context: ScriptableContext<"matrix">) => number);
 };
 
-export type ChartData<T> = {
-  datasets: T[];
+export type PiechartData<T> = {
+  label: string;
+  backgroundColor: string[];
+  data: T[];
+};
+
+export type ChartData<TData, TLabel = undefined> = {
+  labels?: TLabel;
+  datasets: TData[];
 };
 
 export type Reddit = {
@@ -94,4 +101,9 @@ export type PaginatedList<T> = {
   total: number;
   page: number;
   pages: number;
+};
+
+export type PieValue = {
+  key: string;
+  value: number;
 };
