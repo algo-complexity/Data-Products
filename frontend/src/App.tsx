@@ -1,5 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import { HomeOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import {
+  HomeOutlined,
+  LikeOutlined,
+  DislikeOutlined,
+  LineOutlined,
+} from "@ant-design/icons";
 import {
   Layout,
   Space,
@@ -9,6 +14,9 @@ import {
   Skeleton,
   Card,
   Menu,
+  Image,
+  Typography,
+  Button,
 } from "antd";
 import "antd/dist/antd.css";
 import {
@@ -47,6 +55,7 @@ import useSWRInfinite from "swr/infinite";
 import { Candlestick, Matrix } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
+import removeMarkdown from "markdown-to-text";
 import { MatrixElement } from "chartjs-chart-matrix";
 
 ChartJS.register(
@@ -61,6 +70,7 @@ ChartJS.register(
   MatrixElement,
 );
 
+const { Paragraph } = Typography;
 const { Content, Footer, Sider } = Layout;
 
 const Indicators = ({ stock }: { stock: Stock }) => {
@@ -185,6 +195,13 @@ const Indicators = ({ stock }: { stock: Stock }) => {
   );
 };
 
+const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
+  <Space>
+    {React.createElement(icon)}
+    {text}
+  </Space>
+);
+
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
   const [data, setData] = useState<
@@ -252,72 +269,127 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
   );
 };
 
-// const Tweets = ({ stock }: { stock: Stock }) => {
-//   const getKey = (
-//     pageIndex: number,
-//     previousPageData: PaginatedList<Tweet>,
-//   ) => {
-//     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
-//   };
+const Tweets = ({ stock }: { stock: Stock }) => {
+  const getKey = (
+    pageIndex: number,
+    previousPageData: PaginatedList<Tweet>,
+  ) => {
+    if (previousPageData && !previousPageData.items.length) return null;
+    return `/api/stock/${stock.ticker}/tweets?page=${pageIndex + 1}`;
+  };
 
-//   const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
-//     getKey,
-//     fetcher,
-//     { initialSize: 1 },
-//   );
+  const { data, size, setSize } = useSWRInfinite<PaginatedList<Tweet>>(
+    getKey,
+    fetcher,
+    { initialSize: 1 },
+  );
 
-//   const [tweets, setTweets] = useState<Tweet[]>([]);
-//   const [maxData, setMaxData] = useState(0);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const [maxData, setMaxData] = useState(0);
 
-//   useEffect(() => {
-//     if (data) {
-//       setTweets(data.map((paged) => paged.items).flat());
-//       setMaxData(data[0].total);
-//     }
-//   }, [data]);
+  useEffect(() => {
+    if (data) {
+      setTweets(data.map((paged) => paged.items).flat());
+      setMaxData(data[0].total);
+    }
+  }, [data]);
 
-//   return (
-//     <>
-//       <h3>Tweets</h3>
-//       <div
-//         id="scrollableDiv"
-//         style={{
-//           height: 400,
-//           overflow: "auto",
-//           padding: "0 16px",
-//           border: "1px solid rgba(140, 140, 140, 0.35)",
-//         }}
-//       >
-//         {data && tweets ? (
-//           <InfiniteScroll
-//             dataLength={tweets.length}
-//             next={() => setSize(size + 1)}
-//             hasMore={tweets.length < maxData}
-//             loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-//             endMessage={<Divider plain>End</Divider>}
-//             scrollableTarget="scrollableDiv"
-//           >
-//             <List
-//               dataSource={tweets}
-//               renderItem={(item) => (
-//                 <List.Item key={item.author}>
-//                   <List.Item.Meta
-//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.author}</a>}
-//                     description={item.content}
-//                   />
-//                   <div>hashtags: {item.hashtags}</div>
-//                 </List.Item>
-//               )}
-//             />
-//           </InfiniteScroll>
-//         ) : (
-//           ""
-//         )}
-//       </div>
-//     </>
-//   );
-// };
+  return (
+    <>
+      <h3>Tweets</h3>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
+        }}
+      >
+        {data && tweets ? (
+          <InfiniteScroll
+            dataLength={tweets.length}
+            next={() => setSize(size + 1)}
+            hasMore={tweets.length < maxData}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            endMessage={<Divider plain>End</Divider>}
+            scrollableTarget="scrollableDiv"
+          >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={tweets
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
+            <List
+              dataSource={tweets}
+              renderItem={(item) => (
+                <List.Item
+                  key={item.author}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
+                  <List.Item.Meta
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.author}
+                      </a>
+                    }
+                    description={
+                      <Space size={40}>
+                        <div>Retweets: {item.retweets}</div>
+                        <div>Likes: {item.likes}</div>
+                        <div>Quotes: {item.quotes}</div>
+                        <div>Replies: {item.replies}</div>
+                        <div>Publicity Score: {item.pub_score}</div>
+                        <div>Hashtags: {item.hashtags}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
+                  />
+                  {removeMarkdown(item.content)}
+                </List.Item>
+              )}
+            />
+          </InfiniteScroll>
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
+};
 
 const RedditComponent = ({ stock }: { stock: Stock }) => {
   const getKey = (
@@ -365,19 +437,67 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
             endMessage={<Divider plain>End</Divider>}
             scrollableTarget="scrollableDiv"
           >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={reddit
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
             <List
               dataSource={reddit}
+              itemLayout="vertical"
               renderItem={(item, i) => (
-                <List.Item key={i}>
+                <List.Item
+                  key={i}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
                   <List.Item.Meta
                     title={
                       <a target="_blank" rel="noreferrer" href={item.url}>
                         {item.author}
                       </a>
                     }
-                    description={item.content}
+                    description={
+                      <Space size={40}>
+                        <div>Score: {item.score}</div>
+                        <div>Commments: {item.num_comments}</div>
+                        <div>
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </div>
+                      </Space>
+                    }
                   />
-                  <div>Score: {item.score}</div>
+                  {removeMarkdown(item.content)}
                 </List.Item>
               )}
             />
@@ -390,72 +510,147 @@ const RedditComponent = ({ stock }: { stock: Stock }) => {
   );
 };
 
-// const NewsComponent = ({ stock }: { stock: Stock }) => {
-//   const getKey = (pageIndex: number, previousPageData: PaginatedList<News>) => {
-//     if (previousPageData && !previousPageData.items.length) return null;
-//     return `/api/stock/${stock.ticker}/news?page=${pageIndex + 1}`;
-//   };
+const NewsComponent = ({ stock }: { stock: Stock }) => {
+  const getKey = (pageIndex: number, previousPageData: PaginatedList<News>) => {
+    if (previousPageData && !previousPageData.items.length) return null;
+    return `/api/stock/${stock.ticker}/news?page=${pageIndex + 1}`;
+  };
 
-//   const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
-//     getKey,
-//     fetcher,
-//     { initialSize: 1 },
-//   );
+  const { data, size, setSize } = useSWRInfinite<PaginatedList<News>>(
+    getKey,
+    fetcher,
+    { initialSize: 1 },
+  );
 
-//   const [news, setNews] = useState<News[]>([]);
-//   const [maxData, setMaxData] = useState(0);
+  const [news, setNews] = useState<News[]>([]);
+  const [maxData, setMaxData] = useState(0);
 
-//   useEffect(() => {
-//     if (data) {
-//       setNews(data.map((paged) => paged.items).flat());
-//       setMaxData(data[0].total);
-//     }
-//   }, [data]);
+  useEffect(() => {
+    if (data) {
+      setNews(data.map((paged) => paged.items).flat());
+      setMaxData(data[0].total);
+    }
+  }, [data]);
 
-//   return (
-//     <>
-//       <h3>news</h3>
-//       <div
-//         id="scrollableDiv"
-//         style={{
-//           height: 400,
-//           overflow: "auto",
-//           padding: "0 16px",
-//           border: "1px solid rgba(140, 140, 140, 0.35)",
-//         }}
-//       >
-//         {data && news ? (
-//           <InfiniteScroll
-//             dataLength={news.length}
-//             next={() => setSize(size + 1)}
-//             hasMore={news.length < maxData}
-//             loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
-//             endMessage={<Divider plain>End</Divider>}
-//             scrollableTarget="scrollableDiv"
-//           >
-//             <List
-//               dataSource={news}
-//               renderItem={(item) => (
-//                 <List.Item key={item.headline}>
-//                   <List.Item.Meta
-//                     title={<a target="_blank" rel="noreferrer" href={item.url}>{item.headline}</a>}
-//                     description={item.content}
-//                   />
-//                   <div>sentiment: {item.sentiment}</div>
-//                 </List.Item>
-//               )}
-//             />
-//           </InfiniteScroll>
-//         ) : (
-//           ""
-//         )}
-//       </div>
-//     </>
-//   );
-// };
+  return (
+    <>
+      <h3>News</h3>
+      <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: "auto",
+          padding: "0 16px",
+          border: "1px solid rgba(140, 140, 140, 0.35)",
+        }}
+      >
+        {data && news ? (
+          <InfiniteScroll
+            dataLength={news.length}
+            next={() => setSize(size + 1)}
+            hasMore={news.length < maxData}
+            loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+            endMessage={<Divider plain>End</Divider>}
+            scrollableTarget="scrollableDiv"
+          >
+            {
+              <>
+                <h1>Overall sentiment:</h1>
+                <Space size={35}>
+                  <IconText
+                    icon={LikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "positive")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={LineOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "neutral")
+                      .length.toString()}
+                  />
+                  <IconText
+                    icon={DislikeOutlined}
+                    text={news
+                      .filter((item) => item.sentiment === "negative")
+                      .length.toString()}
+                  />
+                </Space>
+              </>
+            }
+            <List
+              dataSource={news}
+              renderItem={(item) => (
+                <List.Item
+                  key={item.headline}
+                  actions={[
+                    item.sentiment === "positive" && (
+                      <IconText icon={LikeOutlined} text="1" />
+                    ),
+                    item.sentiment === "neutral" && (
+                      <IconText icon={LineOutlined} text="1" />
+                    ),
+                    item.sentiment === "negative" && (
+                      <IconText icon={DislikeOutlined} text="1" />
+                    ),
+                  ]}
+                >
+                  <Divider />
+                  <List.Item.Meta
+                    title={
+                      <a target="_blank" rel="noreferrer" href={item.url}>
+                        {item.headline}
+                      </a>
+                    }
+                  />
+                  {"Source: " + item.source}
+                </List.Item>
+              )}
+            />
+          </InfiniteScroll>
+        ) : (
+          ""
+        )}
+      </div>
+    </>
+  );
+};
 
 const Profile = ({ stock }: { stock: Stock }) => {
-  return <Card title={stock.name} size={"small"}></Card>;
+  const [ellipsis, setEllipsis] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const typoMore = () => {
+    setEllipsis(true);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
+  const typoLess = () => {
+    setEllipsis(false);
+    setKey(!ellipsis ? key + 0 : key + 1);
+    return ellipsis;
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <Image src={stock.image_url ? stock.image_url : ""}></Image>
+      <Card title={stock.name}>
+        <Paragraph
+          style={{ width: "10vw" }}
+          key={key}
+          ellipsis={{
+            rows: 2,
+            expandable: true,
+            onExpand: typoMore,
+            symbol: "more",
+          }}
+        >
+          {stock.summary}
+        </Paragraph>
+        {ellipsis && <Button onClick={typoLess}>less</Button>}
+      </Card>
+    </div>
+  );
 };
 
 const Dashboard = ({ ticker }: { ticker: string }) => {
@@ -472,8 +667,8 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
         <StockPrice stock={stock} />
         <Indicators stock={stock} />
       </Space>
-      {/* <Tweets stock={stock} />
-      <NewsComponent stock={stock} /> */}
+      <Tweets stock={stock} />
+      <NewsComponent stock={stock} />
       <RedditComponent stock={stock} />
     </Space>
   );

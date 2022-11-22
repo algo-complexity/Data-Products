@@ -10,10 +10,16 @@ class Stock(BaseModel):
     name: str
     ticker: str
     summary: str
+    image_url: Optional[str]
 
     @classmethod
     def from_orm(cls, stock: models.Stock):
-        return cls(name=stock.name, ticker=stock.ticker, summary=stock.summary)
+        return cls(
+            name=stock.name,
+            ticker=stock.ticker,
+            summary=stock.summary,
+            image_url=stock.image_url,
+        )
 
 
 class StockStub(BaseModel):
@@ -51,7 +57,7 @@ class Reddit(BaseModel):
     content: str
     timestamp: datetime
     author: str
-    sentiment: Optional[str]
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
     score: int
     num_comments: int
     url: str
@@ -67,6 +73,54 @@ class Reddit(BaseModel):
             score=reddit.score,
             num_comments=reddit.num_comments,
             url=reddit.url,
+        )
+
+
+class Tweet(BaseModel):
+    content: str
+    timestamp: datetime
+    author: str
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
+    retweets: int
+    replies: int
+    likes: int
+    quotes: int
+    pub_score: int
+    hashtags: list[str]
+    url: str
+
+    @classmethod
+    def from_orm(cls, tweet: models.Tweet):
+        return cls(
+            content=tweet.content,
+            timestamp=tweet.timestamp,
+            author=tweet.author,
+            url=tweet.url,
+            sentiment=tweet.sentiment,
+            retweets=tweet.retweets,
+            replies=tweet.replies,
+            likes=tweet.likes,
+            quotes=tweet.quotes,
+            pub_score=tweet.pub_score,
+            hashtags=tweet.hashtags.split(),
+        )
+
+
+class News(BaseModel):
+    headline: str
+    url: str
+    timestamp: datetime
+    sentiment: Optional[Literal["positive", "negative", "neutral"]]
+    source: str
+
+    @classmethod
+    def from_orm(cls, news: models.News):
+        return cls(
+            headline=news.headline,
+            url=news.url,
+            timestamp=news.timestamp,
+            sentiment=news.sentiment,
+            source=news.source,
         )
 
 
