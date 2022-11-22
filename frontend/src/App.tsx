@@ -19,7 +19,13 @@ import {
   Button,
 } from "antd";
 import "antd/dist/antd.css";
-import { fetcher, searchStock, useStock, useStockPrice } from "./api/api";
+import {
+  fetcher,
+  searchStock,
+  useSentiment,
+  useStock,
+  useStockPrice,
+} from "./api/api";
 import {
   PaginatedList,
   Stock,
@@ -27,10 +33,13 @@ import {
   News,
   Reddit,
   ChartData,
+  CandlestickData,
+  PiechartData,
 } from "./api/types";
 import {
   Chart as ChartJS,
   CategoryScale,
+  ArcElement,
   LinearScale,
   BarElement,
   Title,
@@ -46,9 +55,11 @@ import { Candlestick } from "./components/typedCharts";
 import "chartjs-adapter-date-fns";
 import { CandlestickElement } from "chartjs-chart-financial";
 import removeMarkdown from "markdown-to-text";
+import { Pie } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
+  ArcElement,
   LinearScale,
   TimeSeriesScale,
   BarElement,
@@ -70,7 +81,9 @@ const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
 
 const StockPrice = ({ stock }: { stock: Stock }) => {
   const { prices } = useStockPrice(stock.ticker);
-  const [data, setData] = useState<ChartData<FinancialDataPoint>>({
+  const [data, setData] = useState<
+    ChartData<CandlestickData<FinancialDataPoint>>
+  >({
     datasets: [
       {
         label: stock.name,
@@ -138,6 +151,61 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       width={1200}
       height={400}
     />
+  );
+};
+
+const SentimentCharts = ({
+  stock,
+  source = "tweet",
+}: {
+  stock: Stock;
+  source?: "tweet" | "news" | "reddit";
+}) => {
+  const { sentiments } = useSentiment(stock.ticker, source);
+  const [data, setData] = useState<ChartData<PiechartData<number>, string[]>>({
+    labels: [],
+    datasets: [
+      {
+        label: "",
+        data: [],
+        backgroundColor: [],
+      },
+    ],
+  });
+  useEffect(() => {
+    if (sentiments) {
+      setData({
+        labels: sentiments.map((sentiment) => sentiment.key),
+        datasets: [
+          {
+            label: `${source} Sentiment`,
+            backgroundColor: [
+              "rgb(102, 189, 99)",
+              "rgb(255, 255, 191)",
+              "rgb(215, 48, 39)",
+            ],
+            data: sentiments.map((sentiment) => sentiment.value),
+          },
+        ],
+      });
+    }
+  }, [sentiments]);
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: `${source[0].toUpperCase() + source.slice(1)} Sentiment`,
+      },
+    },
+  };
+
+  return (
+    <Pie id="pieChart" data={data} options={options} height={300} width={300} />
   );
 };
 
@@ -538,6 +606,13 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
         <Profile stock={stock} />
         <StockPrice stock={stock} />
       </Space>
+
+      <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
+        <SentimentCharts stock={stock} source="news" />
+        <SentimentCharts stock={stock} source="reddit" />
+        <SentimentCharts stock={stock} />
+      </Space>
+
       <Tweets stock={stock} />
       <NewsComponent stock={stock} />
       <RedditComponent stock={stock} />

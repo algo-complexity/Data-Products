@@ -50,8 +50,15 @@ export type CandlestickData<T> = {
   data: T[];
 };
 
-export type ChartData<T> = {
-  datasets: CandlestickData<T>[];
+export type PiechartData<T> = {
+  label: string;
+  backgroundColor: string[];
+  data: T[];
+};
+
+export type ChartData<TData, TLabel = undefined> = {
+  labels?: TLabel;
+  datasets: TData[];
 };
 
 export type Reddit = {
@@ -71,4 +78,9 @@ export type PaginatedList<T> = {
   total: number;
   page: number;
   pages: number;
+};
+
+export type PieValue = {
+  key: string;
+  value: number;
 };
