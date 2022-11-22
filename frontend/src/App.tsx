@@ -167,9 +167,9 @@ const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "
           {
             label: `${source} Sentiment`,
             backgroundColor: [
-              'rgb(255, 99, 132)',
-              'rgb(54, 162, 235)',
-              'rgb(255, 205, 86)'
+              'rgb(102, 189, 99)',
+              'rgb(255, 255, 191)',
+              'rgb(215, 48, 39)',
             ],
             data: sentiments.map((sentiment) => sentiment.value),
           },
@@ -186,7 +186,7 @@ const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "
       },
       title: {
         display: true,
-        text: stock.name,
+        text: `${source[0].toUpperCase() + source.slice(1)} Sentiment`,
       },
     },
   };
@@ -196,8 +196,8 @@ const SentimentCharts = ({ stock, source = "tweet" }: { stock: Stock, source?: "
       id="pieChart"
       data={data}
       options={options}
-      height={200}
-      width={200}
+      height={300}
+      width={300}
     />
   )
 }
@@ -601,7 +601,7 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
         <StockPrice stock={stock} />
       </Space>
 
-      <Space size={100}>
+      <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
         <SentimentCharts stock={stock} source='news' />
         <SentimentCharts stock={stock} source="reddit" />
         <SentimentCharts stock={stock} />

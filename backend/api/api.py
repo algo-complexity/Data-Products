@@ -75,4 +75,4 @@ def get_stock_sentiment(request, ticker: str, q: Literal["tweet", "reddit", "new
         .first()
     )
 
-    return [schemas.PieValue(key=key, value=getattr(results, key)) for key in ["positive", "negative", "neutral"]]
+    return [schemas.PieValue(key=key, value=getattr(results, key)) for key in ["positive", "neutral", "negative"]]
