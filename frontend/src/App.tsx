@@ -691,7 +691,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "row" }}>
+    <div>
       <Image src={stock.image_url ? stock.image_url : ""}></Image>
       <Card title={stock.name}>
         <Paragraph
