@@ -2,6 +2,7 @@ from typing import Literal
 
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import datetime, timedelta
 from ninja import Router
 
 from schemas import PaginatedList, paginate
@@ -35,9 +36,9 @@ def get_stock(request, ticker: str):
 
 @router.get("/stock/{str:ticker}/price", response=list[schemas.Price])
 def get_stock_price(request, ticker: str):
-    results = models.Price.objects.filter(stock__ticker=ticker).order_by("-timestamp")[
-        :252
-    ]
+    results = models.Price.objects.filter(
+        stock__ticker=ticker, timestamp__gte=datetime.now() - timedelta(days=365)
+    )[:252]
     return [schemas.Price.from_orm(price) for price in results]
 
 
