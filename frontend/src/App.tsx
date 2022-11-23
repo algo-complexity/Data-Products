@@ -256,6 +256,19 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       legend: {
         position: "top" as const,
       },
+      tooltip: {
+        callbacks: {
+          label: (context: TooltipItem<"candlestick">) => {
+            const v = context.raw as FinancialDataPoint;
+            return [
+              "Open: " + v.o,
+              "High: " + v.h,
+              "Low: " + v.l,
+              "Close: " + v.c,
+            ];
+          },
+        },
+      },
       title: {
         display: true,
         text: stock.name,
