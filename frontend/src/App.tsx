@@ -126,10 +126,10 @@ const Indicators = ({ stock }: { stock: Stock }) => {
             label: stock.name,
             backgroundColor: (context) =>
               (context.raw as CategoricalMatrixDataPoint).v === "positive"
-                ? "rgba(0, 255, 0, 0.5)"
+                ? "rgb(102, 189, 99)"
                 : (context.raw as CategoricalMatrixDataPoint).v === "negative"
-                ? "rgba(255, 0, 0, 0.5)"
-                : "rgba(255, 255, 0, 0.5)",
+                ? "rgb(215, 38, 39)"
+                : "rgb(255, 255, 191)",
             borderColor: "#000000",
             width: ({ chart, dataset }) =>
               chart.chartArea.width / dataset.data.length,
