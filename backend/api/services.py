@@ -244,10 +244,11 @@ def get_image_url(query):
 
     search = GoogleSearch(params)
     results = search.get_dict()
-    suggested = results["suggested_searches"]
-    image_url = [result for result in suggested if result["name"] == "logo"]
-    if image_url:
-        return image_url[0]["thumbnail"]
+    suggested = results.get("suggested_searches")
+    if suggested:
+        image_url = [result for result in suggested if result["name"] == "logo"]
+        if image_url:
+            return image_url[0]["thumbnail"]
     return "https://static.thenounproject.com/png/3674270-200.png"
 
 
@@ -295,6 +296,15 @@ def get_tweets(query) -> pd.DataFrame:
         ["retweet_count", "reply_count", "like_count", "quote_count"]
     ].sum(axis=1)
     tweets_df["sentiment"] = tweets_df["text"].apply(get_sentiment)
+
+    # get usernames
+    users = pd.DataFrame(
+        [
+            {"username": x.username, "author_id": x.id}
+            for x in twitter.get_users(ids=list(tweets_df["author_id"])).data
+        ]
+    )
+    tweets_df = tweets_df.merge(users, on="author_id")
 
     # sort by publicity
     tweets_df.sort_values(by="pub_score", ascending=False, inplace=True)

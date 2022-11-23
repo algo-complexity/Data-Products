@@ -45,7 +45,7 @@ class SentimentChoices(models.TextChoices):
 
 class News(models.Model):
     headline = models.TextField()
-    url = models.URLField(unique=True, max_length=800)
+    url = models.TextField(unique=True)
     timestamp = models.DateTimeField()
     sentiment = models.TextField(null=True, choices=SentimentChoices.choices)
     source = models.TextField()

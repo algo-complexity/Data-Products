@@ -744,12 +744,12 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
       <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
         <SentimentCharts stock={stock} source="news" />
-        <SentimentCharts stock={stock} source="reddit" />
         <SentimentCharts stock={stock} />
+        <SentimentCharts stock={stock} source="reddit" />
       </Space>
 
-      <Tweets stock={stock} />
       <NewsComponent stock={stock} />
+      <Tweets stock={stock} />
       <RedditComponent stock={stock} />
     </Space>
   );
