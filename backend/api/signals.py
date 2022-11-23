@@ -38,7 +38,7 @@ def handle_stock_post_save(instance: models.Stock, created: bool, **kwargs):
                 defaults=dict(
                     content=args.text,
                     timestamp=args.created_at,
-                    author=args.author_id,
+                    author=args.username,
                     url=args.url,
                     sentiment=args.sentiment,
                     retweets=args.retweet_count,

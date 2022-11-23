@@ -193,7 +193,7 @@ const Indicators = ({ stock }: { stock: Stock }) => {
       id="indicatorsChart"
       options={options}
       data={data}
-      width={600}
+      width={400}
       height={400}
     />
   );
@@ -280,7 +280,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       id="stockChart"
       options={options}
       data={data}
-      width={600}
+      width={1000}
       height={400}
     />
   );
@@ -708,7 +708,7 @@ const Profile = ({ stock }: { stock: Stock }) => {
       <Image src={stock.image_url ? stock.image_url : ""}></Image>
       <Card title={stock.name}>
         <Paragraph
-          style={{ width: "10vw" }}
+          style={{ width: "800" }}
           key={key}
           ellipsis={{
             rows: 2,
@@ -734,20 +734,22 @@ const Dashboard = ({ ticker }: { ticker: string }) => {
 
   return (
     <Space size={40} direction="vertical" style={{ width: "100%" }}>
-      <Space size={100}>
+      <Space>
         <Profile stock={stock} />
+      </Space>
+      <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
         <StockPrice stock={stock} />
         <Indicators stock={stock} />
       </Space>
 
       <Space style={{ width: "100%", justifyContent: "space-evenly" }}>
         <SentimentCharts stock={stock} source="news" />
-        <SentimentCharts stock={stock} source="reddit" />
         <SentimentCharts stock={stock} />
+        <SentimentCharts stock={stock} source="reddit" />
       </Space>
 
-      <Tweets stock={stock} />
       <NewsComponent stock={stock} />
+      <Tweets stock={stock} />
       <RedditComponent stock={stock} />
     </Space>
   );
