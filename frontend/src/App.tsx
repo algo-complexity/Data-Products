@@ -153,7 +153,7 @@ const Indicators = ({ stock }: { stock: Stock }) => {
     plugins: {
       title: {
         display: true,
-        text: stock.name,
+        text: "Indicator Signals",
       },
       tooltip: {
         callbacks: {
@@ -271,7 +271,7 @@ const StockPrice = ({ stock }: { stock: Stock }) => {
       },
       title: {
         display: true,
-        text: stock.name,
+        text: "Stock Price",
       },
     },
   };
