@@ -6,7 +6,7 @@ authors = ["Bhargav Singapuri <bhsingapuri@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-Django = "^4.0.7"
+Django = "^4.1.6"
 psycopg2-binary = "^2.9.3"
 python-dotenv = "^0.19.2"
 pre-commit = "^2.17.0"
